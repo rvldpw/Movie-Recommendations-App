@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-#  CUSTOM CSS  —  FUN / MEME THEME
+#  CUSTOM CSS  —  FUN / MEME THEME (optimised)
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -43,7 +43,6 @@ html, body, [data-testid="stAppViewContainer"] {
     font-family: 'Nunito', sans-serif !important;
 }
 
-/* Sidebar */
 [data-testid="stSidebar"] {
     background: var(--yellow) !important;
     border-right: 3px solid var(--border) !important;
@@ -69,7 +68,6 @@ html, body, [data-testid="stAppViewContainer"] {
     line-height: 1.1;
     margin-bottom: 0.2rem;
 }
-
 .hero-sub {
     font-family: 'Nunito', sans-serif;
     font-size: 1.1rem;
@@ -84,7 +82,6 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-bottom: 1.5rem;
 }
 
-/* Section headers */
 .section-header {
     font-family: 'Fredoka One', cursive;
     font-size: 1.8rem;
@@ -291,7 +288,8 @@ div[data-testid="stButton"] > button:active {
 }
 
 /* Inputs */
-div[data-testid="stTextInput"] input {
+div[data-testid="stTextInput"] input,
+div[data-testid="stTextArea"] textarea {
     background: white !important;
     border: 2.5px solid var(--border) !important;
     border-radius: 10px !important;
@@ -309,7 +307,6 @@ div[data-testid="stSelectbox"] > div {
 }
 .stSlider [data-testid="stSlider"] { accent-color: var(--pink); }
 
-/* Tag pills */
 .tag {
     display: inline-block;
     background: var(--purple);
@@ -324,7 +321,6 @@ div[data-testid="stSelectbox"] > div {
     box-shadow: 2px 2px 0 var(--border);
 }
 
-/* Empty state */
 .empty-state {
     text-align: center;
     padding: 3rem 2rem;
@@ -342,9 +338,7 @@ div[data-testid="stSelectbox"] > div {
     font-size: 1.6rem;
     margin-bottom: 0.5rem;
 }
-.empty-state p { color: #555; font-weight: 600; }
 
-/* Sidebar label */
 .sidebar-title {
     font-family: 'Fredoka One', cursive;
     font-size: 1.6rem;
@@ -367,24 +361,14 @@ div[data-testid="stSelectbox"] > div {
     margin-top: 0.8rem;
 }
 
-/* Tabs */
 div[data-testid="stTabs"] button {
     font-family: 'Fredoka One', cursive !important;
     font-size: 1rem !important;
-    color: var(--dark) !important;
 }
 div[data-testid="stTabs"] button[aria-selected="true"] {
     border-bottom: 3px solid var(--pink) !important;
     color: var(--pink) !important;
 }
-
-/* Alert */
-div[data-testid="stAlert"] {
-    border: 2px solid var(--border) !important;
-    border-radius: 12px !important;
-    box-shadow: var(--shadow) !important;
-}
-
 hr { border-color: var(--border) !important; border-width: 2px !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -393,9 +377,7 @@ hr { border-color: var(--border) !important; border-width: 2px !important; }
 # ─────────────────────────────────────────────
 #  CONSTANTS
 # ─────────────────────────────────────────────
-# Get a free TMDB API key at: https://www.themoviedb.org/settings/api
-# Works much better than IMDB scraping!
-TMDB_API_KEY = "8265bd1679663a7ea12ac168da84d2e8"  # public demo key
+TMDB_API_KEY = "8265bd1679663a7ea12ac168da84d2e8"  # public demo key (replace with yours)
 
 ALL_GENRES = [
     "Action", "Adventure", "Animation", "Comedy", "Crime",
@@ -411,27 +393,26 @@ TMDB_GENRE_MAP = {
     "Mystery": 9648, "Romance": 10749, "Science Fiction": 878,
     "Thriller": 53, "War": 10752, "Western": 37,
 }
-
 TMDB_ID_TO_NAME = {v: k for k, v in TMDB_GENRE_MAP.items()}
 
-
 # ─────────────────────────────────────────────
-#  TMDB FETCHER
+#  TMDB FETCHER (cached)
 # ─────────────────────────────────────────────
+@st.cache_data(show_spinner=False)
 def fetch_tmdb_movies(genres_to_fetch: list[str], pages_per_genre: int = 2) -> pd.DataFrame:
-    """Fetch movies from TMDB API — reliable, fast, no blocking."""
+    """Fetch movies from TMDB — cached to avoid repeated calls."""
     rows = []
     seen_ids = set()
-
     total = len(genres_to_fetch) * pages_per_genre
     done = 0
-    bar = st.progress(0, text="🍿 Fetching movies from TMDB...")
+
+    progress_text = st.empty()
+    progress_bar = st.progress(0, text="🍿 Fetching movies from TMDB...")
 
     for genre_name in genres_to_fetch:
         genre_id = TMDB_GENRE_MAP.get(genre_name)
         if not genre_id:
             continue
-
         for page in range(1, pages_per_genre + 1):
             try:
                 url = "https://api.themoviedb.org/3/discover/movie"
@@ -445,23 +426,24 @@ def fetch_tmdb_movies(genres_to_fetch: list[str], pages_per_genre: int = 2) -> p
                 }
                 r = requests.get(url, params=params, timeout=10)
                 data = r.json()
-
                 for m in data.get("results", []):
                     mid = m.get("id")
                     if not mid or mid in seen_ids:
                         continue
                     seen_ids.add(mid)
-
                     genre_ids = m.get("genre_ids", [])
                     genres_str = ", ".join(TMDB_ID_TO_NAME.get(gid, "") for gid in genre_ids if gid in TMDB_ID_TO_NAME)
-
                     poster_path = m.get("poster_path", "")
                     poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else ""
-
+                    year_str = str(m.get("release_date", ""))[:4]
+                    try:
+                        year = int(year_str) if year_str.isdigit() else None
+                    except:
+                        year = None
                     rows.append({
                         "tmdb_id": mid,
                         "title": m.get("title", ""),
-                        "year": str(m.get("release_date", ""))[:4],
+                        "year": year,
                         "seed_genre": genre_name,
                         "genres": genres_str,
                         "plot": m.get("overview", ""),
@@ -469,17 +451,21 @@ def fetch_tmdb_movies(genres_to_fetch: list[str], pages_per_genre: int = 2) -> p
                         "popularity": m.get("popularity", 0),
                         "poster_url": poster_url,
                     })
-
             except Exception:
                 pass
-
             done += 1
             pct = done / total
-            bar.progress(pct, text=f"🎬 Fetching {genre_name} — page {page}/{pages_per_genre}")
-            time.sleep(0.2)
+            progress_bar.progress(pct, text=f"🎬 {genre_name} page {page}/{pages_per_genre}")
+            time.sleep(0.1)
 
-    bar.empty()
-    return pd.DataFrame(rows).drop_duplicates(subset=["tmdb_id"]) if rows else pd.DataFrame()
+    progress_bar.empty()
+    progress_text.empty()
+    df = pd.DataFrame(rows).drop_duplicates(subset=["tmdb_id"]) if rows else pd.DataFrame()
+    # drop rows with missing year to enable filtering
+    if not df.empty:
+        df = df.dropna(subset=["year"])
+        df["year"] = df["year"].astype(int)
+    return df
 
 
 @st.cache_data(show_spinner=False)
@@ -502,10 +488,15 @@ def search_tmdb_by_name(query: str) -> list[dict]:
             genre_ids = m.get("genre_ids", [])
             genres_str = ", ".join(TMDB_ID_TO_NAME.get(gid, "") for gid in genre_ids if gid in TMDB_ID_TO_NAME)
             poster_path = m.get("poster_path", "")
+            year_str = str(m.get("release_date", ""))[:4]
+            try:
+                year = int(year_str) if year_str.isdigit() else None
+            except:
+                year = None
             results.append({
                 "tmdb_id": m.get("id"),
                 "title": m.get("title", ""),
-                "year": str(m.get("release_date", ""))[:4],
+                "year": year,
                 "genres": genres_str,
                 "plot": m.get("overview", ""),
                 "rating": round(m.get("vote_average", 0), 1),
@@ -520,9 +511,10 @@ def search_tmdb_by_name(query: str) -> list[dict]:
 
 
 # ─────────────────────────────────────────────
-#  RECOMMENDER ENGINE
+#  RECOMMENDER ENGINE (with vectorizer persistence)
 # ─────────────────────────────────────────────
 def build_engine(df: pd.DataFrame):
+    """Create TF-IDF matrix and similarity, store vectorizer."""
     df["features"] = (
         df["genres"].fillna("") + " " +
         df["seed_genre"].fillna("") + " " +
@@ -530,61 +522,93 @@ def build_engine(df: pd.DataFrame):
     )
     tfidf = TfidfVectorizer(stop_words="english", max_features=8000)
     matrix = tfidf.fit_transform(df["features"])
-    return cosine_similarity(matrix)
+    sim = cosine_similarity(matrix)
+    return sim, tfidf, matrix
 
 
 def get_recommendations(
     df: pd.DataFrame,
     sim,
+    tfidf_vec,
+    feature_matrix,
     liked_titles: list[str],
     preferred_genres: list[str],
+    query_text: str = "",
+    min_year: int = 1900,
+    max_year: int = 2030,
+    min_rating: float = 0.0,
     top_n: int = 10,
 ) -> pd.DataFrame:
-    title_lower = df["title"].str.lower()
+    # Filter by year & rating first
+    filtered = df.copy()
+    if "year" in filtered.columns:
+        filtered = filtered[(filtered["year"] >= min_year) & (filtered["year"] <= max_year)]
+    filtered = filtered[filtered["rating"] >= min_rating]
+
+    if filtered.empty:
+        return pd.DataFrame()
+
+    # Case 1: free‑text query (no liked movies)
+    if not liked_titles and query_text.strip() and not preferred_genres:
+        query_vec = tfidf_vec.transform([query_text])
+        sim_scores = cosine_similarity(query_vec, feature_matrix[filtered.index]).flatten()
+        filtered["_sim_score"] = sim_scores
+        filtered = filtered[filtered["_sim_score"] > 0]
+        if filtered.empty:
+            return pd.DataFrame()
+        filtered["match_score"] = filtered["_sim_score"]
+        return filtered.sort_values("match_score", ascending=False).head(top_n).reset_index(drop=True)
+
+    # Case 2: liked movies (with optional genre preference & text)
+    title_lower = filtered["title"].str.lower()
     liked_indices = []
     for t in liked_titles:
-        matches = df[title_lower == t.lower()]
+        matches = filtered[title_lower == t.lower()]
         if not matches.empty:
             liked_indices.append(matches.index[0])
 
-    if not liked_indices:
-        mask = pd.Series([True] * len(df), index=df.index)
-        if preferred_genres:
-            mask = df["genres"].fillna("").apply(
-                lambda g: any(pg.lower() in g.lower() for pg in preferred_genres)
-            )
-        subset = df[mask].copy()
-        if subset.empty:
-            subset = df.copy()
-        subset["match_score"] = pd.to_numeric(subset["rating"], errors="coerce").fillna(0) / 10
-        return subset.sort_values("match_score", ascending=False).head(top_n).reset_index(drop=True)
+    if liked_indices:
+        agg_scores = None
+        for idx in liked_indices:
+            # map idx to original position in feature_matrix (index)
+            original_pos = filtered.index.get_loc(idx)
+            s = sim[original_pos]
+            agg_scores = s if agg_scores is None else agg_scores + s
+        agg_scores = agg_scores / len(liked_indices)
+        filtered["_sim_score"] = agg_scores
+        # exclude liked movies themselves
+        filtered = filtered[~filtered["title"].str.lower().isin([t.lower() for t in liked_titles])]
+    else:
+        # no liked movies, use genre preference only
+        filtered["_sim_score"] = 0.0
 
-    agg_scores = None
-    for idx in liked_indices:
-        s = sim[idx]
-        agg_scores = s if agg_scores is None else agg_scores + s
-    agg_scores = agg_scores / len(liked_indices)
-
-    result = df.copy()
-    result["_sim_score"] = agg_scores
-    liked_set = {t.lower() for t in liked_titles}
-    result = result[~result["title"].str.lower().isin(liked_set)]
-
+    # genre boost
     if preferred_genres:
         def genre_boost(row):
             g = (row["genres"] or "").lower()
             hits = sum(1 for pg in preferred_genres if pg.lower() in g)
             return hits * 0.05
-        result["_genre_boost"] = result.apply(genre_boost, axis=1)
+        filtered["_genre_boost"] = filtered.apply(genre_boost, axis=1)
     else:
-        result["_genre_boost"] = 0
+        filtered["_genre_boost"] = 0.0
 
-    result["match_score"] = result["_sim_score"] + result["_genre_boost"]
-    return result.sort_values("match_score", ascending=False).head(top_n).reset_index(drop=True)
+    # if we have both liked and query_text, mix similarities
+    if liked_indices and query_text.strip():
+        query_vec = tfidf_vec.transform([query_text])
+        query_sim = cosine_similarity(query_vec, feature_matrix[filtered.index]).flatten()
+        filtered["_text_score"] = query_sim
+        filtered["match_score"] = (filtered["_sim_score"] * 0.7) + (filtered["_text_score"] * 0.3) + filtered["_genre_boost"]
+    else:
+        filtered["match_score"] = filtered["_sim_score"] + filtered["_genre_boost"]
+
+    # fallback: if score is zero (no liked and no genre boost) -> use rating
+    if filtered["match_score"].sum() == 0:
+        filtered["match_score"] = filtered["rating"] / 10
+    return filtered.sort_values("match_score", ascending=False).head(top_n).reset_index(drop=True)
 
 
 # ─────────────────────────────────────────────
-#  CARD RENDERER
+#  CARD RENDERER (same as before)
 # ─────────────────────────────────────────────
 def render_movie_card(row: pd.Series, rank: int, show_score: bool = True):
     title = row.get("title", "Unknown")
@@ -639,95 +663,77 @@ def render_movie_card(row: pd.Series, rank: int, show_score: bool = True):
 
 
 # ─────────────────────────────────────────────
-#  SESSION STATE
+#  SESSION STATE INIT
 # ─────────────────────────────────────────────
 if "df" not in st.session_state:
     st.session_state.df = None
 if "sim" not in st.session_state:
     st.session_state.sim = None
+if "tfidf_vec" not in st.session_state:
+    st.session_state.tfidf_vec = None
+if "feature_matrix" not in st.session_state:
+    st.session_state.feature_matrix = None
 if "recommendations" not in st.session_state:
     st.session_state.recommendations = None
-if "scrape_done" not in st.session_state:
-    st.session_state.scrape_done = False
-if "search_results" not in st.session_state:
-    st.session_state.search_results = []
 if "added_from_search" not in st.session_state:
-    st.session_state.added_from_search = []  # list of dicts from TMDB search
-if "search_query" not in st.session_state:
-    st.session_state.search_query = ""
+    st.session_state.added_from_search = []
 
+# Auto‑load on first run (default genres)
+DEFAULT_GENRES = ["Action", "Drama", "Science Fiction", "Thriller", "Comedy"]
+if st.session_state.df is None:
+    with st.spinner("🍿 Auto‑loading movies for you (default genres)... one sec!"):
+        df = fetch_tmdb_movies(DEFAULT_GENRES, pages_per_genre=2)
+        if not df.empty:
+            sim, vec, mat = build_engine(df)
+            st.session_state.df = df
+            st.session_state.sim = sim
+            st.session_state.tfidf_vec = vec
+            st.session_state.feature_matrix = mat
+            st.session_state.scrape_done = True
+        else:
+            st.warning("Couldn't load initial movies. Check your internet or TMDB API key.")
 
 # ─────────────────────────────────────────────
-#  SIDEBAR
+#  SIDEBAR (collapsible by Streamlit natively)
 # ─────────────────────────────────────────────
 with st.sidebar:
     st.markdown('<div class="sidebar-title">🍿 CineMatch</div>', unsafe_allow_html=True)
     st.markdown('<div class="sidebar-sub">ur personal movie bestie (no cap)</div>', unsafe_allow_html=True)
-
     st.markdown("---")
-    st.markdown('<div class="input-label">🎭 Pick ur genres</div>', unsafe_allow_html=True)
 
+    st.markdown('<div class="input-label">🎭 Pick ur genres</div>', unsafe_allow_html=True)
     scrape_genres = st.multiselect(
         "Genres",
         options=ALL_GENRES,
-        default=["Action", "Drama", "Science Fiction", "Thriller", "Comedy"],
+        default=DEFAULT_GENRES,
         label_visibility="collapsed",
     )
-
-    pages = st.slider(
-        "Pages per genre (20 movies/page)",
-        min_value=1, max_value=5, value=2,
-        help="More pages = more movies to match against."
-    )
-
-    est = len(scrape_genres) * pages * 20
-    st.markdown(
-        f"<div style='font-size:0.78rem;font-weight:700;color:#555;margin-top:0.2rem;'>"
-        f"~{est} movies estimated 🎬</div>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown('<div style="margin-top:0.8rem"></div>', unsafe_allow_html=True)
-
-    if st.button("🚀 Load Movies!"):
+    pages = st.slider("Pages per genre (20 movies/page)", 1, 5, 2,
+                      help="More pages = more movies to match against.")
+    if st.button("🔄 Refresh Data"):
         if not scrape_genres:
-            st.warning("Pick at least one genre bestie 😭")
+            st.warning("Pick at least one genre 😭")
         else:
-            with st.spinner("grabbing movies from TMDB... one sec 🍿"):
+            with st.spinner("Fetching fresh movies..."):
                 df = fetch_tmdb_movies(scrape_genres, pages)
-            if df.empty:
-                st.error("😩 Nothing came back. Check your internet or try fewer genres.")
-            else:
-                sim = build_engine(df)
-                st.session_state.df = df
-                st.session_state.sim = sim
-                st.session_state.scrape_done = True
-                st.session_state.recommendations = None
-                st.success(f"✅ {len(df):,} movies loaded! slay 💅")
+                if df.empty:
+                    st.error("No movies found. Try different genres.")
+                else:
+                    sim, vec, mat = build_engine(df)
+                    st.session_state.df = df
+                    st.session_state.sim = sim
+                    st.session_state.tfidf_vec = vec
+                    st.session_state.feature_matrix = mat
+                    st.session_state.recommendations = None
+                    st.success(f"✅ Loaded {len(df):,} movies!")
+                    st.rerun()
+
+    if st.session_state.df is not None:
+        df_info = st.session_state.df
+        st.markdown(f"📦 **{len(df_info):,} movies** active<br>⭐ Avg rating: {df_info['rating'].mean():.1f}/10", unsafe_allow_html=True)
 
     st.markdown("---")
-
-    if st.session_state.scrape_done and st.session_state.df is not None:
-        df_s = st.session_state.df
-        st.markdown(
-            f"<div style='font-size:0.82rem;font-weight:700;'>"
-            f"📦 <b>{len(df_s):,}</b> movies loaded<br>"
-            f"🎭 <b>{df_s['seed_genre'].nunique()}</b> genre categories<br>"
-            f"⭐ Avg rating: <b>{pd.to_numeric(df_s['rating'], errors='coerce').mean():.1f}</b>/10"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-
-    st.markdown("---")
-    st.markdown(
-        "<div style='font-size:0.72rem;font-weight:700;color:#666;line-height:1.8;'>"
-        "Powered by TMDB API 🎬<br>"
-        "TF-IDF + Cosine Similarity<br>"
-        "Built different 😤"
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
+    st.markdown("*Powered by TMDB API*")
 
 # ─────────────────────────────────────────────
 #  MAIN CONTENT
@@ -735,236 +741,160 @@ with st.sidebar:
 col_title, _ = st.columns([3, 1])
 with col_title:
     st.markdown('<div class="hero-title">🍿 CineMatch</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="hero-sub">tell us what u like. we find what u watch next. no cap.</div>',
-        unsafe_allow_html=True,
-    )
-
+    st.markdown('<div class="hero-sub">tell us what u like. we find what u watch next. no cap.</div>', unsafe_allow_html=True)
 st.markdown("---")
 
-# ── No data yet ──
-if not st.session_state.scrape_done:
+if st.session_state.df is None:
     st.markdown("""
     <div class="empty-state">
-        <div class="emoji">👈</div>
-        <h3>load movies first bestie</h3>
-        <p>Pick genres in the sidebar and hit<br><b>🚀 Load Movies!</b><br>then come back here for recs ✨</p>
+        <div class="emoji">😭</div>
+        <h3>No movies loaded</h3>
+        <p>Use the sidebar to pick genres and click<br><b>🔄 Refresh Data</b></p>
     </div>
     """, unsafe_allow_html=True)
     st.stop()
 
-
-# ─────────────────────────────────────────────
-#  TABS: Recommend  |  Search by Name
-# ─────────────────────────────────────────────
 df = st.session_state.df
 sim = st.session_state.sim
+tfidf_vec = st.session_state.tfidf_vec
+feature_matrix = st.session_state.feature_matrix
 all_titles = sorted(df["title"].unique().tolist())
 
 tab_rec, tab_search = st.tabs(["🎯 Get Recommendations", "🔍 Search by Name"])
-
 
 # ══════════════════════════════════════════════
 #  TAB 1 — RECOMMENDATIONS
 # ══════════════════════════════════════════════
 with tab_rec:
-    st.markdown(
-        '<div class="section-header">🎯 Your Vibe <span class="pill">tell us</span></div>',
-        unsafe_allow_html=True
-    )
+    st.markdown('<div class="section-header">🎯 Your Vibe <span class="pill">tell us</span></div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 1], gap="large")
-
     with col1:
-        st.markdown('<div class="input-label">🎬 movies u already loved</div>', unsafe_allow_html=True)
-        liked_movies = st.multiselect(
-            "liked",
-            options=all_titles,
-            placeholder="type a title...",
-            label_visibility="collapsed",
-        )
-
-        # Also allow adding from name-search tab
+        liked_movies = st.multiselect("🍿 movies u already loved", options=all_titles, placeholder="type a title...")
+        # also include any movies added from search tab
         if st.session_state.added_from_search:
-            added_titles = [m["title"] for m in st.session_state.added_from_search]
-            # Merge with liked_movies (dedup)
+            added_titles = [m["title"] for m in st.session_state.added_from_search if m["title"] in all_titles]
             for t in added_titles:
-                if t not in liked_movies and t in all_titles:
+                if t not in liked_movies:
                     liked_movies.append(t)
-            st.markdown(
-                "<div style='font-size:0.78rem;font-weight:700;color:#888;margin-top:4px;'>"
-                + " ".join(f"<span class='tag'>🔍 {t}</span>" for t in added_titles)
-                + "</div>",
-                unsafe_allow_html=True
-            )
-
-        st.markdown('<div class="input-label" style="margin-top:1rem">📝 or describe the vibe</div>', unsafe_allow_html=True)
-        freetext = st.text_area(
-            "vibe",
-            placeholder="e.g. mind-bending sci-fi with a twist ending... or a movie that made u cry lol",
-            height=90,
-            label_visibility="collapsed",
-        )
-
+        freetext = st.text_area("📝 or describe the vibe", placeholder="e.g. mind-bending sci-fi with a twist ending...", height=90)
     with col2:
-        st.markdown('<div class="input-label">🎭 genres u fw</div>', unsafe_allow_html=True)
-        preferred_genres = st.multiselect(
-            "genres",
-            options=ALL_GENRES,
-            placeholder="pick genres...",
-            label_visibility="collapsed",
-        )
+        preferred_genres = st.multiselect("🎭 genres u fw", options=ALL_GENRES, placeholder="pick genres...")
+        top_n = st.slider("🔢 how many recs?", 5, 20, 10)
 
-        st.markdown('<div class="input-label" style="margin-top:1rem">🔢 how many recs?</div>', unsafe_allow_html=True)
-        top_n = st.slider("n", min_value=5, max_value=20, value=10, label_visibility="collapsed")
+    with st.expander("🎚️ Advanced filters (year / rating)"):
+        min_year, max_year = st.slider("Release year", 1900, 2025, (1990, 2025))
+        min_rating = st.slider("Minimum TMDB rating", 0.0, 10.0, 5.0, 0.5)
 
-        st.markdown('<div style="margin-top:1.5rem"></div>', unsafe_allow_html=True)
-        go_btn = st.button("✨ Give Me Recs!")
-
-    if go_btn:
+    if st.button("✨ Give Me Recs!"):
         if not liked_movies and not preferred_genres and not freetext.strip():
-            st.warning("😭 pick at least one movie or genre bestie")
-            st.stop()
-
-        with st.spinner("cooking up recommendations... 🍳"):
-            recs = get_recommendations(df, sim, liked_movies, preferred_genres, top_n)
-
-        st.session_state.recommendations = recs
+            st.warning("😭 pick at least one movie, genre, or vibe")
+        else:
+            with st.spinner("cooking up recommendations... 🍳"):
+                recs = get_recommendations(
+                    df, sim, tfidf_vec, feature_matrix,
+                    liked_movies, preferred_genres, freetext,
+                    min_year, max_year, min_rating, top_n
+                )
+            st.session_state.recommendations = recs
 
     if st.session_state.recommendations is not None:
         recs = st.session_state.recommendations
-        st.markdown(
-            f'<div class="section-header">🎬 Your Recs <span class="pill">top {len(recs)}</span></div>',
-            unsafe_allow_html=True,
-        )
+        if recs.empty:
+            st.warning("No movies match your filters. Try broader year/rating or different tastes.")
+        else:
+            st.markdown(f'<div class="section-header">🎬 Your Recs <span class="pill">top {len(recs)}</span></div>', unsafe_allow_html=True)
+            tags_html = "".join(f'<span class="tag">🎬 {m}</span>' for m in liked_movies[:5])
+            tags_html += "".join(f'<span class="tag">🎭 {g}</span>' for g in preferred_genres[:5])
+            if tags_html:
+                st.markdown(f"<div style='margin-bottom:1.2rem'>{tags_html}</div>", unsafe_allow_html=True)
 
-        tags_html = ""
-        for m in liked_movies:
-            tags_html += f'<span class="tag">🎬 {m}</span>'
-        for g in preferred_genres:
-            tags_html += f'<span class="tag">🎭 {g}</span>'
-        if tags_html:
-            st.markdown(f"<div style='margin-bottom:1.2rem'>{tags_html}</div>", unsafe_allow_html=True)
-
-        cols = st.columns(5, gap="medium")
-        for i, (_, row) in enumerate(recs.iterrows()):
-            with cols[i % 5]:
-                render_movie_card(row, rank=i + 1)
-
+            cols = st.columns(5, gap="medium")
+            for i, (_, row) in enumerate(recs.iterrows()):
+                with cols[i % 5]:
+                    render_movie_card(row, rank=i+1)
 
 # ══════════════════════════════════════════════
-#  TAB 2 — SEARCH BY NAME
+#  TAB 2 — SEARCH BY NAME (+ fetch similar)
 # ══════════════════════════════════════════════
 with tab_search:
-    st.markdown(
-        '<div class="section-header">🔍 Search <span class="pill">by name</span></div>',
-        unsafe_allow_html=True
-    )
+    st.markdown('<div class="section-header">🔍 Search <span class="pill">by name</span></div>', unsafe_allow_html=True)
 
-    search_col, btn_col = st.columns([4, 1])
-    with search_col:
-        search_query = st.text_input(
-            "search",
-            placeholder="type a movie name...",
-            label_visibility="collapsed",
-            key="search_input",
-        )
-    with btn_col:
-        st.markdown('<div style="margin-top:0.15rem"></div>', unsafe_allow_html=True)
-        search_btn = st.button("🔍 Search!")
+    search_query = st.text_input("Movie title", placeholder="e.g. Inception", label_visibility="collapsed")
+    if st.button("🔍 Search!"):
+        if search_query.strip():
+            with st.spinner("Searching TMDB..."):
+                results = search_tmdb_by_name(search_query)
+            st.session_state.search_results = results
+        else:
+            st.warning("Enter a movie name")
 
-    if search_btn and search_query.strip():
-        with st.spinner("searching TMDB... 🕵️"):
-            results = search_tmdb_by_name(search_query)
-        st.session_state.search_results = results
-
-    if st.session_state.search_results:
+    if "search_results" in st.session_state and st.session_state.search_results:
         results = st.session_state.search_results
-        st.markdown(
-            f"<div style='font-size:0.9rem;font-weight:800;color:#888;margin-bottom:0.8rem;'>"
-            f"found {len(results)} results ✅</div>",
-            unsafe_allow_html=True
-        )
-
-        # Display results as cards (2 columns)
-        res_cols = st.columns(2, gap="medium")
+        st.markdown(f"**Found {len(results)} results**")
         for i, m in enumerate(results):
-            with res_cols[i % 2]:
-                poster_html = (
-                    f'<img class="search-poster" src="{m["poster_url"]}" alt="{m["title"]}"/>'
-                    if m.get("poster_url") else
-                    '<div class="search-poster-placeholder">🎬</div>'
-                )
-                genres_pills = "".join(
-                    f'<span class="search-genres">{g.strip()}</span>'
-                    for g in str(m.get("genres", "")).split(",")[:3] if g.strip()
-                )
-
-                st.markdown(f"""
-                <div class="search-card">
-                    {poster_html}
-                    <div style="flex:1;min-width:0;">
-                        <div class="search-title">{m["title"]}</div>
-                        <div class="search-meta">📅 {m.get("year","?")} &nbsp; ⭐ {m.get("rating","?")}/10</div>
-                        <div style="margin-top:4px">{genres_pills}</div>
-                        <div style="font-size:0.72rem;color:#555;margin-top:4px;line-height:1.4;
-                             display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
-                            {m.get("plot","")}</div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
+            with st.container():
+                col_a, col_b = st.columns([1, 4])
+                with col_a:
+                    if m.get("poster_url"):
+                        st.image(m["poster_url"], width=80)
+                    else:
+                        st.markdown("🎬")
+                with col_b:
+                    st.markdown(f"**{m['title']}** ({m.get('year','?')})  ⭐ {m.get('rating','?')}/10")
+                    st.markdown(f"*{', '.join(m['genres'].split(',')[:3]) if m['genres'] else 'No genres'}*")
+                    st.caption(m.get("plot", "")[:200])
+                    # Two buttons: View details & Find similar
+                    if st.button(f"📖 Details & Similar", key=f"detail_{m['tmdb_id']}_{i}"):
+                        st.session_state.selected_movie = m
         st.markdown("---")
 
-        # Full movie detail for selected movie
-        selected_title = st.selectbox(
-            "👀 pick one to see full details",
-            options=["—"] + [m["title"] for m in results],
-        )
+    # Show detailed view of selected movie + similar movies button
+    if "selected_movie" in st.session_state:
+        sel = st.session_state.selected_movie
+        st.markdown("### 🎬 Movie Details")
+        d1, d2 = st.columns([1, 2])
+        with d1:
+            if sel.get("poster_url_full"):
+                st.image(sel["poster_url_full"], use_container_width=True)
+            else:
+                st.markdown("🎬 *No poster*")
+        with d2:
+            st.markdown(f"## {sel['title']}")
+            st.markdown(f"**Year:** {sel.get('year','?')}  |  **Rating:** {sel.get('rating','?')}/10")
+            st.markdown(f"**Genres:** {sel.get('genres','')}")
+            st.markdown(f"**Overview:** {sel.get('plot','No plot available')}")
 
-        if selected_title != "—":
-            sel = next((m for m in results if m["title"] == selected_title), None)
-            if sel:
-                d1, d2 = st.columns([1, 3])
-                with d1:
-                    if sel.get("poster_url_full"):
-                        st.image(sel["poster_url_full"], use_container_width=True)
-                    else:
-                        st.markdown('<div style="font-size:5rem;text-align:center">🎬</div>', unsafe_allow_html=True)
-                with d2:
-                    st.markdown(
-                        f"<div style='font-family:Fredoka One,cursive;font-size:1.8rem;'>{sel['title']}</div>",
-                        unsafe_allow_html=True
-                    )
-                    st.markdown(
-                        f"<div style='font-weight:700;color:#666;margin-bottom:0.5rem;'>"
-                        f"📅 {sel.get('year','?')} &nbsp;|&nbsp; ⭐ {sel.get('rating','?')}/10 &nbsp;|&nbsp; 🎭 {sel.get('genres','')}"
-                        f"</div>",
-                        unsafe_allow_html=True
-                    )
-                    st.markdown(
-                        f"<div style='font-size:0.95rem;line-height:1.6;color:#333;'>{sel.get('plot','No plot available.')}</div>",
-                        unsafe_allow_html=True
-                    )
+        if st.button("✨ Find similar movies (based on this movie's plot & genres)"):
+            # Use the movie's plot+genres as a query to get recs from the loaded dataset
+            query_text = f"{sel.get('genres','')} {sel.get('plot','')}"
+            sim_recs = get_recommendations(
+                df, sim, tfidf_vec, feature_matrix,
+                liked_titles=[],  # no liked movies, just this description
+                preferred_genres=[],
+                query_text=query_text,
+                min_year=1900,
+                max_year=2025,
+                min_rating=0,
+                top_n=10
+            )
+            if not sim_recs.empty:
+                st.markdown("#### Movies like this:")
+                cols = st.columns(5)
+                for idx, (_, row) in enumerate(sim_recs.iterrows()):
+                    with cols[idx % 5]:
+                        render_movie_card(row, rank=idx+1, show_score=True)
+                # Offer to add the original movie to liked list for the other tab
+                if sel["title"] in all_titles:
+                    if st.button(f"➕ Add '{sel['title']}' to my liked movies (for future recs)"):
+                        if sel not in st.session_state.added_from_search:
+                            st.session_state.added_from_search.append(sel)
+                            st.success(f"Added! Go to 🎯 Get Recommendations tab ✨")
+                else:
+                    st.info("💡 This movie isn't in your current dataset. Load more genres/pages to see it in recommendations.")
+            else:
+                st.warning("No similar movies found. Try broadening your dataset (more genres/pages).")
 
-                    # If this movie is in dataset, offer to add to liked
-                    in_dataset = sel["title"] in all_titles
-                    if in_dataset:
-                        if st.button(f"➕ Add '{sel['title']}' to my liked movies (for recs)"):
-                            already = any(m["title"] == sel["title"] for m in st.session_state.added_from_search)
-                            if not already:
-                                st.session_state.added_from_search.append(sel)
-                                st.success(f"Added! Go to 🎯 Get Recommendations tab ✨")
-                            else:
-                                st.info("Already added!")
-                    else:
-                        st.info("💡 This movie isn't in your loaded dataset. Load more genres/pages, then it'll show up for recommendations too!")
-
-    elif search_btn:
-        st.markdown("""
-        <div class="empty-state" style="max-width:300px;padding:2rem">
-            <div class="emoji">😶</div>
-            <h3>nothing found</h3>
-            <p>try a different title?</p>
-        </div>
-        """, unsafe_allow_html=True)
+        if st.button("Clear selection"):
+            del st.session_state.selected_movie
+            st.rerun()
