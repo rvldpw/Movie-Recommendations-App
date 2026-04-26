@@ -212,7 +212,7 @@ def auto_username(user_id: int) -> str:
 # ── Load & cache model ─────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner="🎬 Starting up CineWrap…")
 def load_system() -> RecommenderSystem:
-    df = load_data("data/data_sample.csv")
+    df = load_data()
 
     model = RecommenderSystem(df)
     model.fit()
