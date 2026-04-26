@@ -1,8 +1,17 @@
 import streamlit as st
 import pandas as pd
 
-from data_loader import load_data
+import os
+import sys
+
+sys.path.append(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
+
 from recommender import RecommenderSystem
+from data_loader import load_data
 
 st.set_page_config(
 page_title='MovieWrap',
