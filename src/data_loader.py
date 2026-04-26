@@ -3,7 +3,7 @@ import gdown
 import pandas as pd
 
 
-FILE_ID = "1cQUO_1eKa3VxHzeGapHmGEmDwrvu0ZYz"
+FILE_ID = "1V7ZJu-kkslnaJ1KVI8yQ7qgMi0zsIQed"
 
 LOCAL_FILE = "data/big.parquet"
 
