@@ -301,8 +301,7 @@ except ValueError:
 
 if not system.user_exists(user_id):
     st.error(
-        f"User **{user_id}** was not found in the dataset. "
-        "Check the sample IDs in the sidebar."
+        f"User **{user_id}** is not registered in the Netflix system."
     )
     st.stop()
 
