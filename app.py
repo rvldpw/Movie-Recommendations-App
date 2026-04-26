@@ -453,9 +453,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("""
     <div style='text-align:center;color:#333;font-size:0.7rem;line-height:1.8'>
-      Built with &#10084;&#65039; using<br>
-      <span style='color:#E50914'>Streamlit &middot; scikit-learn</span><br>
-      Content + Collaborative + Popularity + Country
+      Built with &#10084;&#65039
     </div>
     """, unsafe_allow_html=True)
 
