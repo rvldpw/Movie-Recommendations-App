@@ -2,10 +2,9 @@ import os
 import requests
 import pandas as pd
 
-# Direct download URL for small.parquet on Hugging Face
 HF_URL     = "https://huggingface.co/datasets/rvlpw/movie-recommendations/resolve/main/small.parquet"
 LOCAL_FILE = "/tmp/small.parquet"
-MIN_BYTES  = 1 * 1024 * 1024   # 1 MB minimum
+MIN_BYTES  = 1 * 1024 * 1024   # 1 MB
 
 
 def _is_valid_parquet(path: str) -> bool:
@@ -30,14 +29,6 @@ def load_data() -> pd.DataFrame:
                         bytes_written += len(chunk)
                         print(f"[data_loader]   {bytes_written / 1024**2:.0f} MB …", flush=True)
         print(f"[data_loader] Done — {bytes_written / 1024**2:.1f} MB written.")
-
-        if not _is_valid_parquet(LOCAL_FILE):
-            if os.path.exists(LOCAL_FILE):
-                os.remove(LOCAL_FILE)
-            raise RuntimeError(
-                "[data_loader] Downloaded file is not valid Parquet.\n"
-                "Make sure small.parquet is public on Hugging Face."
-            )
 
     print("[data_loader] Reading parquet …")
     df = pd.read_parquet(LOCAL_FILE)
