@@ -5,4 +5,4 @@ scikit-learn
 scipy
 joblib
 pyarrow
-requests
+huggingface-hub
