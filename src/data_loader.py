@@ -1,13 +1,16 @@
 import os
 import pandas as pd
+
+# Force HF cache to a writable temp directory before importing huggingface_hub
+os.environ["HF_HOME"] = "/tmp/hf_home"
+os.environ["HUGGINGFACE_HUB_CACHE"] = "/tmp/hf_home"
+os.makedirs("/tmp/hf_home", exist_ok=True)
+
 from huggingface_hub import hf_hub_download
 
-# ── Change these two values to match your Hugging Face dataset ────────────────
-HF_REPO_ID = "rvlpw/movie-recommendations"
+HF_REPO_ID  = "rvlpw/movie-recommendations"
 HF_FILENAME = "big.parquet"
-# ─────────────────────────────────────────────────────────────────────────────
-
-LOCAL_FILE = "/tmp/big.parquet"
+LOCAL_FILE  = "/tmp/big.parquet"
 
 
 def load_data() -> pd.DataFrame:
@@ -17,13 +20,14 @@ def load_data() -> pd.DataFrame:
     """
     if not os.path.exists(LOCAL_FILE):
         print(f"[data_loader] Downloading {HF_FILENAME} from Hugging Face …")
-        path = hf_hub_download(
+        hf_hub_download(
             repo_id=HF_REPO_ID,
             filename=HF_FILENAME,
             repo_type="dataset",
             local_dir="/tmp",
+            local_dir_use_symlinks=False,   # write the actual file, not a symlink
         )
-        print(f"[data_loader] Downloaded to {path}")
+        print("[data_loader] Download complete.")
 
     df = pd.read_parquet(LOCAL_FILE)
 
