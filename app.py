@@ -1,25 +1,8 @@
 import streamlit as st
 import pandas as pd
 
-import os
-import sys
-
-sys.path.insert(
-    0,
-    os.path.abspath("src")
-)
-
-from recommender import RecommenderSystem
 from data_loader import load_data
-
-from feature_engineering import (
-    add_recency_weight,
-    build_movie_feature_matrix,
-    build_user_profile,
-    GENRE_COLS
-)
-
-from collaborative import CollaborativeEngine
+from recommender import RecommenderSystem
 
 st.set_page_config(
 page_title='MovieWrap',
