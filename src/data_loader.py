@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 
 # Point this to your small.parquet after uploading to HF
-HF_PARQUET_URL = "https://huggingface.co/api/datasets/rvlpw/movie-recommendations/parquet/default/train"
+HF_PARQUET_URL = "https://huggingface.co/datasets/rvlpw/movie-recommendations"
 LOCAL_FILE     = "/tmp/small.parquet"
 MIN_BYTES      = 1 * 1024 * 1024   # 1 MB minimum (small file now)
 
