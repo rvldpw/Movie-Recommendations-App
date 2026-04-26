@@ -3,7 +3,7 @@ import pandas as pd
 from huggingface_hub import hf_hub_download
 
 # ── Change these two values to match your Hugging Face dataset ────────────────
-HF_REPO_ID = "rvldpw/movie-recommendations"
+HF_REPO_ID = "rvlpw/movie-recommendations"
 HF_FILENAME = "big.parquet"
 # ─────────────────────────────────────────────────────────────────────────────
 
