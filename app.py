@@ -2,79 +2,77 @@ import os
 import gdown
 import pandas as pd
 
-FILE_ID   = "1V7ZJu-kkslnaJ1KVI8yQ7qgMi0zsIQed"
+FILE_ID    = "1V7ZJu-kkslnaJ1KVI8yQ7qgMi0zsIQed"   # ← your new file
 LOCAL_FILE = "data/big.parquet"
 
-# Minimum expected file size in bytes (3 GB file — reject anything smaller than 100 MB)
+# Reject anything smaller than 100 MB (HTML error pages are ~10 KB)
 MIN_BYTES = 100 * 1024 * 1024
 
 
 def _is_valid_parquet(path: str) -> bool:
-    """Return True only if the file exists and looks like a real parquet (not an HTML error page)."""
+    """True only if the file exists, is large enough, and starts with PAR1 magic bytes."""
     if not os.path.exists(path):
         return False
-    size = os.path.getsize(path)
-    if size < MIN_BYTES:
+    if os.path.getsize(path) < MIN_BYTES:
         return False
-    # Parquet files start with the magic bytes PAR1
     with open(path, "rb") as f:
         magic = f.read(4)
     return magic == b"PAR1"
 
 
 def _download(file_id: str, dest: str) -> None:
-    """
-    Download from Google Drive using gdown's fuzzy mode.
-    Falls back to the direct export URL if the first attempt produces a bad file.
-    """
-    url = f"https://drive.google.com/uc?id={file_id}"
+    """Download from Google Drive with two attempts and file validation."""
 
-    # Remove any partial / corrupt file before downloading
+    # Wipe any corrupt/partial file first
     if os.path.exists(dest):
         os.remove(dest)
 
-    print(f"Downloading dataset from Google Drive → {dest}")
+    # Attempt 1 — fuzzy mode handles most large files
+    url = f"https://drive.google.com/uc?id={file_id}"
+    print(f"[data_loader] Downloading dataset → {dest}")
     gdown.download(url, dest, quiet=False, fuzzy=True)
 
-    if not _is_valid_parquet(dest):
-        # gdown sometimes fails silently on large files; try the direct URL variant
-        if os.path.exists(dest):
-            os.remove(dest)
-        fallback_url = f"https://drive.google.com/uc?export=download&confirm=t&id={file_id}"
-        print("First attempt failed — retrying with confirm=t URL …")
-        gdown.download(fallback_url, dest, quiet=False, fuzzy=True)
+    if _is_valid_parquet(dest):
+        return
 
-    if not _is_valid_parquet(dest):
-        # Remove the bad file so the next run tries again
-        if os.path.exists(dest):
-            os.remove(dest)
-        raise RuntimeError(
-            "Downloaded file is not a valid Parquet file. "
-            "Possible causes:\n"
-            "  1. The Google Drive file is not shared as 'Anyone with the link can view'.\n"
-            "  2. Google Drive daily download quota was exceeded — try again in 24 hours.\n"
-            "  3. The FILE_ID in data_loader.py is wrong.\n"
-            f"  FILE_ID used: {file_id}"
-        )
+    # Attempt 2 — force-confirm to bypass Google's virus-scan warning page
+    if os.path.exists(dest):
+        os.remove(dest)
+    fallback_url = f"https://drive.google.com/uc?export=download&confirm=t&id={file_id}"
+    print("[data_loader] Retrying with confirm=t …")
+    gdown.download(fallback_url, dest, quiet=False, fuzzy=True)
+
+    if _is_valid_parquet(dest):
+        return
+
+    # Both failed — clean up and raise a readable error
+    if os.path.exists(dest):
+        os.remove(dest)
+    raise RuntimeError(
+        "\n\n[data_loader] Download failed — file is not a valid Parquet.\n"
+        "Check the following:\n"
+        "  1. Google Drive sharing is set to 'Anyone with the link can VIEW'.\n"
+        "  2. The daily download quota has not been exceeded (try again in 24 h).\n"
+        f"  3. FILE_ID is correct: {file_id}\n"
+    )
 
 
 def load_data() -> pd.DataFrame:
     """
-    Download parquet dataset from Google Drive (first run only),
-    cache locally, then load and preprocess.
+    Download the parquet dataset from Google Drive on first run,
+    cache it locally, then load and preprocess.
     """
     os.makedirs("data", exist_ok=True)
 
-    # Download only if a valid cached file does not already exist
     if not _is_valid_parquet(LOCAL_FILE):
         _download(FILE_ID, LOCAL_FILE)
 
     df = pd.read_parquet(LOCAL_FILE)
 
     # Drop accidental unnamed columns
-    unnamed_cols = [c for c in df.columns if c.startswith("Unnamed")]
-    if unnamed_cols:
-        df = df.drop(columns=unnamed_cols)
+    unnamed = [c for c in df.columns if c.startswith("Unnamed")]
+    if unnamed:
+        df = df.drop(columns=unnamed)
 
     # Unix timestamp → datetime
     df["datetime"] = pd.to_datetime(df["timestamp"], unit="s")
