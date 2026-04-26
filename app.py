@@ -34,7 +34,7 @@ st.markdown("""
 .stApp { background: var(--dark) !important; }
 .block-container { padding: 2rem 3rem !important; max-width: 1400px !important; }
 
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu, footer { visibility: hidden; }  /* keep Streamlit header visible */
 .stDeployButton { display: none; }
 
 [data-testid="stSidebar"] {
