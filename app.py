@@ -299,7 +299,7 @@ with st.sidebar:
     show_posters = st.toggle("Fetch posters from OMDb", value=True)
     st.markdown("---")
     st.markdown("#### 🆔 Sample User IDs")
-    sample_ids = system.all_user_ids()[:12]
+    sample_ids = sorted(random.sample(system.all_user_ids(), min(12, len(system.all_user_ids()))))
     st.markdown("  ".join(f"`{u}`" for u in sample_ids))
     st.markdown("---")
     st.markdown("""
