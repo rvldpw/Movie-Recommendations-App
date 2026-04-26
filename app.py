@@ -486,7 +486,7 @@ except ValueError:
     st.stop()
 
 if not system.user_exists(user_id):
-    st.error(f"User **{user_id}** is not in the dataset.")
+    st.error(f"User **{user_id}** not found. Please create a Netflix account at https://www.netflix.com/.")
     st.stop()
 
 username = auto_username(user_id)
