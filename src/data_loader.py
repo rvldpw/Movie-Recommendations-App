@@ -2,7 +2,7 @@ import os
 import requests
 import pandas as pd
 
-FILE_ID    = "1V7ZJu-kkslnaJ1KVI8yQ7qgMi0zsIQed"
+FILE_ID    = "1h10NTfIaxGbCbOmLvYRv07mjasXfyJ8a"
 LOCAL_FILE = "/tmp/big.parquet"   # /tmp is always writable on Streamlit Cloud
 
 MIN_BYTES  = 100 * 1024 * 1024   # 100 MB — rejects HTML error pages (~10 KB)
