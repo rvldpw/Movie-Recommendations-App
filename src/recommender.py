@@ -3,14 +3,14 @@ import numpy as np
 
 from sklearn.metrics.pairwise import cosine_similarity
 
-from src.feature_engineering import (
+from feature_engineering import (
     add_recency_weight,
     build_movie_feature_matrix,
     build_user_profile,
     GENRE_COLS
 )
 
-from src.collaborative import CollaborativeEngine
+from collaborative import CollaborativeEngine
 
 class RecommenderSystem:
 
