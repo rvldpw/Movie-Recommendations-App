@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Netflix-dark theme CSS ─────────────────────────────────────────────────────
+# ── CSS ────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap');
@@ -33,8 +33,7 @@ st.markdown("""
 
 .stApp { background: var(--dark) !important; }
 .block-container { padding: 2rem 3rem !important; max-width: 1400px !important; }
-
-#MainMenu, footer { visibility: hidden; }  /* keep Streamlit header visible */
+#MainMenu, footer { visibility: hidden; }
 .stDeployButton { display: none; }
 
 [data-testid="stSidebar"] {
@@ -42,8 +41,6 @@ st.markdown("""
     border-right: 1px solid var(--border);
 }
 [data-testid="stSidebar"] * { color: #CCC !important; }
-
-/* Sidebar toggle — always red so user can find it */
 [data-testid="collapsedControl"] {
     background: var(--red) !important;
     border-radius: 0 8px 8px 0 !important;
@@ -64,41 +61,46 @@ st.markdown("""
     box-shadow: 0 0 0 3px rgba(229,9,20,0.2) !important;
 }
 .stTextInput label { color: #888 !important; font-size:0.8rem !important; }
-
 .stSlider [role="slider"] { background: var(--red) !important; }
 .stSlider [data-baseweb="slider-track"] div:first-child { background: var(--red) !important; }
-
-/* Toggle */
 .stToggle label { color: #CCC !important; }
-
 .stProgress > div > div {
     background: linear-gradient(90deg, var(--red2), var(--red)) !important;
     border-radius: 10px !important;
 }
 .stProgress { background: var(--card2) !important; border-radius: 10px !important; }
-
 [data-testid="stMetricValue"] {
     color: var(--red) !important;
     font-family: 'Bebas Neue', sans-serif !important;
     font-size: 2.2rem !important;
 }
 [data-testid="stMetricLabel"] { color: var(--muted) !important; font-size:0.75rem !important; }
-
 hr { border-color: var(--border) !important; margin: 2.5rem 0 !important; }
-
 .stAlert { border-radius: 8px !important; }
 .stSpinner { color: var(--red) !important; }
-
 h1,h2,h3 { font-family:'Bebas Neue',sans-serif !important; letter-spacing:2px !important; }
 h2 { color: var(--white) !important; font-size:1.8rem !important; }
 p, li, span { color:#BBB !important; }
 
-/* Movie poster cards */
+/* ── Movie grid ── */
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.movie-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.movie-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.movie-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+
+/* ── Poster card ── */
 .poster-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
     transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
     height: 100%;
 }
@@ -107,28 +109,42 @@ p, li, span { color:#BBB !important; }
     transform: translateY(-4px);
     box-shadow: 0 16px 40px rgba(229,9,20,0.2);
 }
-.poster-card img {
+.poster-card .poster-img-wrap {
     width: 100%;
     aspect-ratio: 2/3;
+    overflow: hidden;
+    background: #1a1a1a;
+    flex-shrink: 0;
+}
+.poster-card .poster-img-wrap img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     display: block;
 }
-.poster-info { padding: 0.8rem 1rem 1rem; }
+.poster-info {
+    padding: 0.8rem 1rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 .poster-title {
     color: var(--white);
     font-family:'Inter',sans-serif;
     font-weight:600;
     font-size:0.85rem;
     line-height:1.35;
-    margin-bottom:6px;
 }
-.poster-rating { color: var(--gold); font-size:0.78rem; margin-bottom:3px; }
+.poster-rating { color: var(--gold); font-size:0.78rem; }
 .poster-date   { color: var(--muted); font-size:0.73rem; }
-.poster-match  { color: var(--red); font-weight:700; font-size:0.8rem; margin-top:5px; }
+.poster-user-rating { color: #BBB; font-size:0.75rem; }
+.poster-match  { color: var(--red); font-weight:700; font-size:0.8rem; margin-top: auto; padding-top: 6px; }
 .poster-badge  {
     display:inline-block; background:var(--red);
     color:white; font-size:0.7rem; font-weight:700;
-    padding:2px 7px; border-radius:4px; margin-bottom:4px;
+    padding:2px 7px; border-radius:4px;
+    width: fit-content;
 }
 
 /* Hero */
@@ -167,13 +183,12 @@ p, li, span { color:#BBB !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Poster fetching (OMDb) ─────────────────────────────────────────────────────
-OMDB_API_KEY = "trilogy"   # free demo key — get your own free at omdbapi.com
-PLACEHOLDER  = "https://placehold.co/200x300/141414/808080?text=No+Poster"
+# ── OMDb ───────────────────────────────────────────────────────────────────────
+OMDB_API_KEY = "trilogy"
+PLACEHOLDER  = "https://placehold.co/400x600/141414/333333?text=🎬"
 
 @st.cache_data(show_spinner=False, ttl=86400)
 def fetch_movie_info(title: str) -> dict:
-    """Fetch poster + IMDB rating from OMDb."""
     clean = title.split("(")[0].strip()
     try:
         r = requests.get(
@@ -198,34 +213,73 @@ def safe_poster(title: str):
     url  = info["poster"] if info["poster"] not in ("", "N/A") else PLACEHOLDER
     return url, info["imdb"]
 
-# ── Auto-generate movie title from movieId ─────────────────────────────────────
+# ── Username generator ─────────────────────────────────────────────────────────
 _USER_ADJ  = ["Silent","Cosmic","Neon","Crimson","Golden","Shadow","Electric",
               "Frozen","Blazing","Midnight","Velvet","Phantom","Stellar","Iron"]
 _USER_NOUN = ["Watcher","Cinephile","Director","Critic","Reel","Projector",
               "Auteur","Curator","Maverick","Pioneer","Voyager","Lens","Frame"]
 
 def auto_username(user_id: int) -> str:
-    """Generate a deterministic fun username from a userId."""
     rng = random.Random(int(user_id))
     return f"{rng.choice(_USER_ADJ)}{rng.choice(_USER_NOUN)}{user_id % 100:02d}"
 
-# ── Load & cache model ─────────────────────────────────────────────────────────
+# ── Card HTML helpers ──────────────────────────────────────────────────────────
+def recent_card(row, show_posters: bool) -> str:
+    img, imdb = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
+    stars = "★" * int(round(row["rating"])) + "☆" * (5 - int(round(row["rating"])))
+    return f"""
+    <div class="poster-card">
+      <div class="poster-img-wrap">
+        <img src="{img}" alt="" onerror="this.src='{PLACEHOLDER}'"/>
+      </div>
+      <div class="poster-info">
+        <div class="poster-title">{row['title']}</div>
+        <div class="poster-rating">{stars} &nbsp; IMDB {imdb}</div>
+        <div class="poster-date">📅 {row['datetime'].date()}</div>
+        <div class="poster-user-rating">Your rating: {row['rating']}/5</div>
+      </div>
+    </div>"""
+
+def rec_card(row, rank: int, show_posters: bool) -> str:
+    img, imdb = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
+    pct = int(row["score"] * 100)
+    return f"""
+    <div class="poster-card">
+      <div class="poster-img-wrap">
+        <img src="{img}" alt="" onerror="this.src='{PLACEHOLDER}'"/>
+      </div>
+      <div class="poster-info">
+        <div class="poster-badge">#{rank}</div>
+        <div class="poster-title">{row['title']}</div>
+        <div class="poster-rating">IMDB {imdb}</div>
+        <div class="poster-match">🎯 {pct}% match</div>
+      </div>
+    </div>"""
+
+def render_grid(cards: list[str], cols: int = 5) -> None:
+    """Render a list of card HTML strings in a CSS grid."""
+    inner = "\n".join(cards)
+    st.markdown(
+        f'<div class="movie-grid cols-{cols}">{inner}</div>',
+        unsafe_allow_html=True,
+    )
+
+# ── Load system ────────────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner="🎬 Starting up CineWrap…")
 def load_system() -> RecommenderSystem:
-    df = load_data()
-
+    df    = load_data()
     model = RecommenderSystem(df)
     model.fit()
     return model
 
 system = load_system()
 
-# ── Hero Banner ────────────────────────────────────────────────────────────────
+# ── Hero ───────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero">
   <div class="year-pill">2026 EDITION</div>
   <div class="hero-title">CINE<span>WRAP</span></div>
-  <div class="hero-sub">Your personal movie universe — mapped</div>
+  <div class="hero-sub">Your taste. Your universe. Mapped.</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -237,31 +291,16 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     st.markdown("---")
-
     st.markdown("#### 🎯 Recommendations")
-    top_n_recs = st.slider(
-        "How many picks?", 5, 20, 10,
-        help="Total movie recommendations to show you",
-    )
-
+    top_n_recs = st.slider("How many picks?", 5, 20, 10)
     st.markdown("#### 📅 Watch History")
-    top_n_recent = st.slider(
-        "Recent movies shown", 3, 10, 5,
-        help="How many recently watched movies to display",
-    )
-
+    top_n_recent = st.slider("Recent movies shown", 3, 10, 5)
     st.markdown("#### 🖼️ Movie Artwork")
-    show_posters = st.toggle(
-        "Fetch posters from OMDb", value=True,
-        help="Pulls artwork from the internet — disable if offline",
-    )
-
+    show_posters = st.toggle("Fetch posters from OMDb", value=True)
     st.markdown("---")
     st.markdown("#### 🆔 Sample User IDs")
     sample_ids = system.all_user_ids()[:12]
-    formatted  = "  ".join(f"`{u}`" for u in sample_ids)
-    st.markdown(formatted)
-
+    st.markdown("  ".join(f"`{u}`" for u in sample_ids))
     st.markdown("---")
     st.markdown("""
     <div style='text-align:center;color:#333;font-size:0.7rem;line-height:1.8'>
@@ -271,7 +310,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# ── User ID Input ──────────────────────────────────────────────────────────────
+# ── User ID input ──────────────────────────────────────────────────────────────
 user_input = st.text_input(
     "🔍 User ID",
     placeholder="Enter your User ID — e.g. 99476",
@@ -300,14 +339,10 @@ except ValueError:
     st.stop()
 
 if not system.user_exists(user_id):
-    st.error(
-        f"User **{user_id}** is not registered in the Netflix system."
-    )
+    st.error(f"User **{user_id}** is not in the dataset.")
     st.stop()
 
-# ── Generate username for this user ───────────────────────────────────────────
 username = auto_username(user_id)
-
 st.markdown(f"""
 <div style='display:flex;align-items:center;gap:1rem;
             background:#141414;border:1px solid #2A2A2A;border-radius:12px;
@@ -335,61 +370,30 @@ with st.spinner("Crunching your taste profile…"):
 
 # ── Recent Activity ────────────────────────────────────────────────────────────
 st.markdown("## 📽️ YOUR RECENT PHASE")
-
 if recent.empty:
     st.warning("No watch history found for this user.")
 else:
-    cols = st.columns(len(recent))
-    for col, (_, row) in zip(cols, recent.iterrows()):
-        img, imdb = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
-        stars = "★" * int(round(row["rating"])) + "☆" * (5 - int(round(row["rating"])))
-        with col:
-            st.markdown(f"""
-            <div class="poster-card">
-              <img src="{img}" alt="" onerror="this.src='{PLACEHOLDER}'"/>
-              <div class="poster-info">
-                <div class="poster-title">{row['title']}</div>
-                <div class="poster-rating">{stars} &nbsp; IMDB {imdb}</div>
-                <div class="poster-date">📅 {row['datetime'].date()}</div>
-                <div class="poster-rating" style="color:#BBB;">Your rating: {row['rating']}/5</div>
-              </div>
-            </div>
-            """, unsafe_allow_html=True)
+    n     = len(recent)
+    cols  = min(n, 5)
+    cards = [recent_card(row, show_posters) for _, row in recent.iterrows()]
+    render_grid(cards, cols=cols)
 
 # ── Recommendations ────────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("## 🍿 PICKED FOR YOU")
-
 if recs.empty:
     st.warning("Not enough data to generate recommendations.")
 else:
-    rec_list = list(recs.iterrows())
+    cards = [rec_card(row, i + 1, show_posters) for i, (_, row) in enumerate(recs.iterrows())]
+    # Render in rows of 5
     chunk = 5
-    for row_start in range(0, len(rec_list), chunk):
-        batch = rec_list[row_start:row_start + chunk]
-        cols  = st.columns(len(batch))
-        for col, (_, row) in zip(cols, batch):
-            pct = int(row["score"] * 100)
-            img, imdb = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
-            rank_num = row_start + list(recs["title"]).index(row["title"]) + 1
-            with col:
-                st.markdown(f"""
-                <div class="poster-card">
-                  <img src="{img}" alt="" onerror="this.src='{PLACEHOLDER}'"/>
-                  <div class="poster-info">
-                    <div class="poster-badge">#{rank_num}</div>
-                    <div class="poster-title">{row['title']}</div>
-                    <div class="poster-rating">IMDB {imdb}</div>
-                    <div class="poster-match">🎯 {pct}% match</div>
-                  </div>
-                </div>
-                """, unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
+    for i in range(0, len(cards), chunk):
+        batch = cards[i:i + chunk]
+        render_grid(batch, cols=len(batch))
 
 # ── Taste DNA ──────────────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("## 🧬 YOUR TASTE DNA")
-
 if genres:
     genre_df = pd.DataFrame(genres, columns=["Genre", "Score"]).set_index("Genre")
     col1, col2 = st.columns([3, 1])
