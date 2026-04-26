@@ -258,7 +258,7 @@ def rec_card(row, rank: int, show_posters: bool) -> str:
 
 def render_grid(cards: list[str], cols: int = 5) -> None:
     """Render a list of card HTML strings in a CSS grid."""
-    inner = "\n".join(cards)
+    inner = "".join(cards)  # ← Change "\n".join to "".join
     st.markdown(
         f'<div class="movie-grid cols-{cols}">{inner}</div>',
         unsafe_allow_html=True,
@@ -385,11 +385,11 @@ if recs.empty:
     st.warning("Not enough data to generate recommendations.")
 else:
     cards = [rec_card(row, i + 1, show_posters) for i, (_, row) in enumerate(recs.iterrows())]
-    # Render in rows of 5
-    chunk = 5
-    for i in range(0, len(cards), chunk):
-        batch = cards[i:i + chunk]
-        render_grid(batch, cols=len(batch))
+    all_cards = "".join(cards)
+    st.markdown(
+        f'<div class="movie-grid cols-5">{all_cards}</div>',
+        unsafe_allow_html=True,
+    )
 
 # ── Taste DNA ──────────────────────────────────────────────────────────────────
 st.markdown("---")
