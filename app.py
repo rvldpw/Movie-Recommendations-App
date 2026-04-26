@@ -83,18 +83,18 @@ h1,h2,h3 { font-family:'Bebas Neue',sans-serif !important; letter-spacing:2px !i
 h2 { color: var(--white) !important; font-size:1.8rem !important; }
 p, li, span { color:#BBB !important; }
 
-/* ── Movie grid ── */
 .movie-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 16px;
     margin-bottom: 24px;
 }
+.movie-grid.cols-1 { grid-template-columns: repeat(1, 1fr); }
+.movie-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
 .movie-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
 .movie-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
 .movie-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
 
-/* ── Poster card ── */
 .poster-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -132,35 +132,42 @@ p, li, span { color:#BBB !important; }
 }
 .poster-title {
     color: var(--white);
-    font-family:'Inter',sans-serif;
-    font-weight:600;
-    font-size:0.85rem;
-    line-height:1.35;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    line-height: 1.35;
 }
-.poster-rating  { color: var(--gold); font-size:0.78rem; }
-.poster-date    { color: var(--muted); font-size:0.73rem; }
-.poster-country { color: #9ECAFF; font-size:0.73rem; margin-top:1px; }
-.poster-user-rating { color: #BBB; font-size:0.75rem; }
-.poster-match   { color: var(--red); font-weight:700; font-size:0.8rem; margin-top: auto; padding-top: 6px; }
-.poster-badge   {
-    display:inline-block; background:var(--red);
-    color:white; font-size:0.7rem; font-weight:700;
-    padding:2px 7px; border-radius:4px;
+.poster-rating     { color: var(--gold); font-size: 0.78rem; }
+.poster-date       { color: var(--muted); font-size: 0.73rem; }
+.poster-user-rating{ color: #BBB; font-size: 0.75rem; }
+.poster-match      { color: var(--red); font-weight: 700; font-size: 0.8rem; margin-top: auto; padding-top: 6px; }
+.poster-badge {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
     width: fit-content;
 }
 .country-tag {
-    display:inline-block;
-    background:#1a2a3a;
-    color:#9ECAFF !important;
-    font-size:0.68rem;
-    padding:2px 6px;
-    border-radius:4px;
+    display: inline-block;
+    background: #1a2a3a;
+    color: #9ECAFF !important;
+    font-size: 0.68rem;
+    padding: 2px 6px;
+    border-radius: 4px;
     border: 1px solid #1e3a5a;
     width: fit-content;
     margin-top: 2px;
 }
+.boost-tag {
+    color: #4CAF50 !important;
+    font-size: 0.68rem;
+    margin-top: 2px;
+}
 
-/* Hero */
 .hero {
     background: linear-gradient(135deg, #200000 0%, #0A0A0A 55%);
     border: 1px solid #1E1E1E;
@@ -171,54 +178,63 @@ p, li, span { color:#BBB !important; }
     overflow: hidden;
 }
 .hero::after {
-    content:'';
-    position:absolute; top:0; right:0; width:40%; height:100%;
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
     background: radial-gradient(ellipse at 80% 50%, rgba(229,9,20,0.15), transparent 70%);
-    pointer-events:none;
+    pointer-events: none;
 }
 .year-pill {
-    display:inline-block; background:var(--red);
-    color:white; font-family:'Bebas Neue',sans-serif;
-    font-size:0.95rem; letter-spacing:3px;
-    padding:3px 14px; border-radius:20px; margin-bottom:0.8rem;
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 3px;
+    padding: 3px 14px;
+    border-radius: 20px;
+    margin-bottom: 0.8rem;
 }
 .hero-title {
-    font-family:'Bebas Neue',sans-serif;
-    font-size:3.8rem; color:var(--white);
-    letter-spacing:6px; line-height:1; margin:0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.8rem;
+    color: var(--white);
+    letter-spacing: 6px;
+    line-height: 1;
+    margin: 0;
 }
-.hero-title span { color:var(--red); }
+.hero-title span { color: var(--red); }
 .hero-sub {
-    font-family:'Inter',sans-serif; font-size:0.9rem;
-    color:var(--muted); margin-top:0.6rem; letter-spacing:2px;
-    text-transform:uppercase;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ── OMDb ───────────────────────────────────────────────────────────────────────
 OMDB_API_KEY = "trilogy"
-PLACEHOLDER  = "https://placehold.co/400x600/141414/333333?text=🎬"
+PLACEHOLDER  = "https://placehold.co/400x600/141414/333333?text=No+Poster"
 
-# Country code → flag emoji map (top cinematically active countries)
 COUNTRY_FLAGS = {
-    "USA": "🇺🇸", "UK": "🇬🇧", "France": "🇫🇷", "Germany": "🇩🇪",
-    "Italy": "🇮🇹", "Spain": "🇪🇸", "Japan": "🇯🇵", "South Korea": "🇰🇷",
-    "China": "🇨🇳", "India": "🇮🇳", "Australia": "🇦🇺", "Canada": "🇨🇦",
-    "Mexico": "🇲🇽", "Brazil": "🇧🇷", "Sweden": "🇸🇪", "Denmark": "🇩🇰",
-    "Norway": "🇳🇴", "Finland": "🇫🇮", "Netherlands": "🇳🇱", "Belgium": "🇧🇪",
-    "Switzerland": "🇨🇭", "Austria": "🇦🇹", "Poland": "🇵🇱", "Czech Republic": "🇨🇿",
-    "Hungary": "🇭🇺", "Romania": "🇷🇴", "Russia": "🇷🇺", "Turkey": "🇹🇷",
-    "Iran": "🇮🇷", "Israel": "🇮🇱", "Argentina": "🇦🇷", "Colombia": "🇨🇴",
-    "Chile": "🇨🇱", "Hong Kong": "🇭🇰", "Taiwan": "🇹🇼", "Thailand": "🇹🇭",
-    "Indonesia": "🇮🇩", "Philippines": "🇵🇭", "Malaysia": "🇲🇾",
-    "New Zealand": "🇳🇿", "South Africa": "🇿🇦", "Nigeria": "🇳🇬",
-    "Egypt": "🇪🇬", "Greece": "🇬🇷", "Portugal": "🇵🇹", "Ireland": "🇮🇪",
-    "United Kingdom": "🇬🇧", "United States": "🇺🇸",
+    "USA": "🇺🇸", "United States": "🇺🇸", "UK": "🇬🇧", "United Kingdom": "🇬🇧",
+    "France": "🇫🇷", "Germany": "🇩🇪", "Italy": "🇮🇹", "Spain": "🇪🇸",
+    "Japan": "🇯🇵", "South Korea": "🇰🇷", "China": "🇨🇳", "India": "🇮🇳",
+    "Australia": "🇦🇺", "Canada": "🇨🇦", "Mexico": "🇲🇽", "Brazil": "🇧🇷",
+    "Sweden": "🇸🇪", "Denmark": "🇩🇰", "Norway": "🇳🇴", "Finland": "🇫🇮",
+    "Netherlands": "🇳🇱", "Belgium": "🇧🇪", "Switzerland": "🇨🇭", "Austria": "🇦🇹",
+    "Poland": "🇵🇱", "Czech Republic": "🇨🇿", "Hungary": "🇭🇺", "Romania": "🇷🇴",
+    "Russia": "🇷🇺", "Turkey": "🇹🇷", "Iran": "🇮🇷", "Israel": "🇮🇱",
+    "Argentina": "🇦🇷", "Colombia": "🇨🇴", "Chile": "🇨🇱", "Hong Kong": "🇭🇰",
+    "Taiwan": "🇹🇼", "Thailand": "🇹🇭", "Indonesia": "🇮🇩", "Philippines": "🇵🇭",
+    "Malaysia": "🇲🇾", "New Zealand": "🇳🇿", "South Africa": "🇿🇦",
+    "Nigeria": "🇳🇬", "Egypt": "🇪🇬", "Greece": "🇬🇷", "Portugal": "🇵🇹",
+    "Ireland": "🇮🇪",
 }
 
 def country_flag(country_str: str) -> str:
-    """Return flag emoji for the primary country, or 🌍 fallback."""
     if not country_str or country_str == "N/A":
         return "🌍"
     primary = country_str.split(",")[0].strip()
@@ -240,7 +256,7 @@ def fetch_movie_info(title: str) -> dict:
                 "imdb":    data.get("imdbRating", "N/A"),
                 "year":    data.get("Year", ""),
                 "genre":   data.get("Genre", ""),
-                "country": data.get("Country", ""),   # ← NEW
+                "country": data.get("Country", ""),
             }
     except Exception:
         pass
@@ -252,18 +268,12 @@ def safe_poster(title: str):
     return url, info["imdb"]
 
 def get_movie_country(title: str) -> str:
-    """Return primary country string for a movie title."""
     info = fetch_movie_info(title)
     raw  = info.get("country", "") or ""
     return raw.split(",")[0].strip() if raw else ""
 
-# ── Country profile builder ────────────────────────────────────────────────────
-def build_country_profile(recent_df: pd.DataFrame) -> dict[str, float]:
-    """
-    Build a weighted country preference map from the user's watch history.
-    Higher-rated movies give more weight to their country.
-    Returns {country: weight_0_to_1}
-    """
+# ── Country profile ────────────────────────────────────────────────────────────
+def build_country_profile(recent_df: pd.DataFrame) -> dict:
     counter: Counter = Counter()
     for _, row in recent_df.iterrows():
         country = get_movie_country(row["title"])
@@ -275,26 +285,20 @@ def build_country_profile(recent_df: pd.DataFrame) -> dict[str, float]:
     total = sum(counter.values())
     return {c: round(w / total, 4) for c, w in counter.most_common()}
 
-def country_boost(country: str, profile: dict[str, float]) -> float:
-    """
-    Return a boost multiplier [1.0 – 1.5] based on how well
-    a movie's country matches the user's preference profile.
-    """
+def country_boost(country: str, profile: dict) -> float:
     if not profile or not country:
         return 1.0
     weight = profile.get(country, 0.0)
-    # Scale: top country gets 1.5x, unknown gets 1.0x
     max_w  = max(profile.values()) if profile else 1.0
     return 1.0 + 0.5 * (weight / max_w) if max_w > 0 else 1.0
 
-def rerank_with_country(recs_df: pd.DataFrame, profile: dict[str, float]) -> pd.DataFrame:
-    """
-    Re-rank recommendations by boosting scores for preferred countries.
-    Fetches country for each rec, applies boost, re-sorts.
-    """
+def rerank_with_country(recs_df: pd.DataFrame, profile: dict) -> pd.DataFrame:
     if recs_df.empty or not profile:
+        if "country" not in recs_df.columns:
+            recs_df = recs_df.copy()
+            recs_df["country"] = ""
+            recs_df["boost"]   = 1.0
         return recs_df
-
     countries, boosts, new_scores = [], [], []
     for _, row in recs_df.iterrows():
         c     = get_movie_country(row["title"])
@@ -302,11 +306,10 @@ def rerank_with_country(recs_df: pd.DataFrame, profile: dict[str, float]) -> pd.
         countries.append(c)
         boosts.append(boost)
         new_scores.append(row["score"] * boost)
-
     result = recs_df.copy()
-    result["country"]   = countries
-    result["boost"]     = boosts
-    result["score"]     = new_scores
+    result["country"] = countries
+    result["boost"]   = boosts
+    result["score"]   = new_scores
     return result.sort_values("score", ascending=False).reset_index(drop=True)
 
 # ── Username generator ─────────────────────────────────────────────────────────
@@ -340,61 +343,71 @@ def auto_username(user_id: int) -> str:
     rng = random.Random(int(user_id))
     return f"{rng.choice(_USER_ADJ)}{rng.choice(_USER_NOUN)}{user_id % 100:02d}"
 
-# ── Card HTML helpers ──────────────────────────────────────────────────────────
+# ── Card helpers ───────────────────────────────────────────────────────────────
+def _card_wrap(inner: str) -> str:
+    return (
+        '<div class="poster-card">'
+        + inner
+        + '</div>'
+    )
+
 def recent_card(row, show_posters: bool) -> str:
     img, imdb = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
     country   = get_movie_country(row["title"])
     flag      = country_flag(country)
-    stars     = "★" * int(round(row["rating"])) + "☆" * (5 - int(round(row["rating"])))
+    rating    = int(round(row["rating"]))
+    stars     = "&#9733;" * rating + "&#9734;" * (5 - rating)
     country_html = (
-        f'<div class="country-tag">{flag} {country}</div>'
+        '<div class="country-tag">' + flag + " " + country + "</div>"
         if country else ""
     )
-    return f"""
-    <div class="poster-card">
-      <div class="poster-img-wrap">
-        <img src="{img}" alt="" onerror="this.src='{PLACEHOLDER}'"/>
-      </div>
-      <div class="poster-info">
-        <div class="poster-title">{row['title']}</div>
-        <div class="poster-rating">{stars} &nbsp; IMDB {imdb}</div>
-        <div class="poster-date">📅 {row['datetime'].date()}</div>
-        {country_html}
-        <div class="poster-user-rating">Your rating: {row['rating']}/5</div>
-      </div>
-    </div>"""
+    inner = (
+        '<div class="poster-img-wrap">'
+        '<img src="' + img + '" alt="" onerror="this.src=&quot;' + PLACEHOLDER + '&quot;"/>'
+        '</div>'
+        '<div class="poster-info">'
+        '<div class="poster-title">' + row["title"] + "</div>"
+        '<div class="poster-rating">' + stars + " &nbsp; IMDB " + imdb + "</div>"
+        '<div class="poster-date">&#128197; ' + str(row["datetime"].date()) + "</div>"
+        + country_html
+        + '<div class="poster-user-rating">Your rating: ' + str(row["rating"]) + "/5</div>"
+        "</div>"
+    )
+    return _card_wrap(inner)
 
 def rec_card(row, rank: int, show_posters: bool) -> str:
     img, imdb = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
     pct       = int(row["score"] * 100)
-    # country comes pre-fetched in the reranked df; fallback to live fetch
-    country   = row.get("country") or get_movie_country(row["title"])
+    country   = str(row.get("country") or get_movie_country(row["title"]))
     flag      = country_flag(country)
-    boosted   = row.get("boost", 1.0) > 1.05
-    boost_tag = '<span style="color:#4CAF50;font-size:0.68rem">✦ Country match</span>' if boosted else ""
+    boosted   = float(row.get("boost", 1.0)) > 1.05
     country_html = (
-        f'<div class="country-tag">{flag} {country}</div>'
+        '<div class="country-tag">' + flag + " " + country + "</div>"
         if country else ""
     )
-    return f"""
-    <div class="poster-card">
-      <div class="poster-img-wrap">
-        <img src="{img}" alt="" onerror="this.src='{PLACEHOLDER}'"/>
-      </div>
-      <div class="poster-info">
-        <div class="poster-badge">#{rank}</div>
-        <div class="poster-title">{row['title']}</div>
-        <div class="poster-rating">IMDB {imdb}</div>
-        {country_html}
-        {boost_tag}
-        <div class="poster-match">🎯 {pct}% match</div>
-      </div>
-    </div>"""
+    boost_html = (
+        '<div class="boost-tag">&#10022; Country match</div>'
+        if boosted else ""
+    )
+    inner = (
+        '<div class="poster-img-wrap">'
+        '<img src="' + img + '" alt="" onerror="this.src=&quot;' + PLACEHOLDER + '&quot;"/>'
+        '</div>'
+        '<div class="poster-info">'
+        '<div class="poster-badge">#' + str(rank) + "</div>"
+        '<div class="poster-title">' + row["title"] + "</div>"
+        '<div class="poster-rating">IMDB ' + imdb + "</div>"
+        + country_html
+        + boost_html
+        + '<div class="poster-match">&#127919; ' + str(pct) + "% match</div>"
+        "</div>"
+    )
+    return _card_wrap(inner)
 
-def render_grid(cards: list[str], cols: int = 5) -> None:
+def render_grid(cards: list, cols: int = 5) -> None:
     inner = "".join(cards)
     st.markdown(
-        f'<div class="movie-grid cols-{cols}">{inner}</div>',
+        '<div class="movie-grid cols-' + str(cols) + '">' + inner + "</div>",
         unsafe_allow_html=True,
     )
 
@@ -440,8 +453,8 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("""
     <div style='text-align:center;color:#333;font-size:0.7rem;line-height:1.8'>
-      Built with ❤️ using<br>
-      <span style='color:#E50914'>Streamlit · scikit-learn</span><br>
+      Built with &#10084;&#65039; using<br>
+      <span style='color:#E50914'>Streamlit &middot; scikit-learn</span><br>
       Content + Collaborative + Popularity + Country
     </div>
     """, unsafe_allow_html=True)
@@ -456,7 +469,7 @@ user_input = st.text_input(
 if not user_input:
     st.markdown("""
     <div style='text-align:center;padding:5rem 0 3rem;'>
-      <div style='font-size:4rem'>🎬</div>
+      <div style='font-size:4rem'>&#127916;</div>
       <div style='font-family:Bebas Neue,sans-serif;font-size:1.6rem;
                   letter-spacing:4px;color:#333;margin-top:1.2rem;'>
         ENTER YOUR USER ID ABOVE
@@ -479,35 +492,54 @@ if not system.user_exists(user_id):
     st.stop()
 
 username = auto_username(user_id)
-st.markdown(f"""
-<div style='display:flex;align-items:center;gap:1rem;
-            background:#141414;border:1px solid #2A2A2A;border-radius:12px;
-            padding:1rem 1.5rem;margin-bottom:1.5rem;'>
-  <div style='width:48px;height:48px;border-radius:50%;background:#E50914;
-              display:flex;align-items:center;justify-content:center;
-              font-family:Bebas Neue,sans-serif;font-size:1.4rem;color:white;flex-shrink:0'>
-    {username[0].upper()}
-  </div>
-  <div>
-    <div style='font-family:Bebas Neue,sans-serif;font-size:1.3rem;
-                color:white;letter-spacing:2px'>@{username}</div>
-    <div style='font-size:0.75rem;color:#555;font-family:Inter,sans-serif'>
-      User ID {user_id} &nbsp;·&nbsp; Your CineWrap 2026
-    </div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    "<div style='display:flex;align-items:center;gap:1rem;"
+    "background:#141414;border:1px solid #2A2A2A;border-radius:12px;"
+    "padding:1rem 1.5rem;margin-bottom:1.5rem;'>"
+    "<div style='width:48px;height:48px;border-radius:50%;background:#E50914;"
+    "display:flex;align-items:center;justify-content:center;"
+    "font-family:Bebas Neue,sans-serif;font-size:1.4rem;color:white;flex-shrink:0'>"
+    + username[0].upper()
+    + "</div>"
+    "<div>"
+    "<div style='font-family:Bebas Neue,sans-serif;font-size:1.3rem;"
+    "color:white;letter-spacing:2px'>@" + username + "</div>"
+    "<div style='font-size:0.75rem;color:#555;font-family:Inter,sans-serif'>"
+    "User ID " + str(user_id) + " &nbsp;&middot;&nbsp; Your CineWrap 2026"
+    "</div></div></div>",
+    unsafe_allow_html=True,
+)
 
 # ── Load results ───────────────────────────────────────────────────────────────
 with st.spinner("Crunching your taste profile…"):
-    recent  = system.get_recent_activity(user_id, top_n=top_n_recent)
-    recs    = system.recommend(user_id, top_n=top_n_recs)
-    genres  = system.get_user_profile(user_id)
+    recent = system.get_recent_activity(user_id, top_n=top_n_recent)
+    recs   = system.recommend(user_id, top_n=top_n_recs)
+    genres = system.get_user_profile(user_id)
 
-# ── Build country profile from full watch history (not just recent slice) ──────
 with st.spinner("🌍 Learning your country preferences…"):
     full_history    = system.get_recent_activity(user_id, top_n=200)
     country_profile = build_country_profile(full_history) if country_boost_enabled else {}
+
+# ── Country DNA in sidebar ─────────────────────────────────────────────────────
+if country_profile:
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown("#### 🌍 Your Country DNA")
+        for c, w in list(country_profile.items())[:6]:
+            flag = country_flag(c)
+            bar  = int(w * 100)
+            st.markdown(
+                "<div style='margin-bottom:6px'>"
+                "<div style='display:flex;justify-content:space-between;"
+                "font-size:0.75rem;color:#BBB;margin-bottom:2px'>"
+                "<span>" + flag + " " + c + "</span>"
+                "<span style='color:#E50914'>" + str(bar) + "%</span>"
+                "</div>"
+                "<div style='background:#1C1C1C;border-radius:3px;height:4px'>"
+                "<div style='background:#E50914;width:" + str(bar) + "%;height:4px;border-radius:3px'></div>"
+                "</div></div>",
+                unsafe_allow_html=True,
+            )
 
 # ── Recent Activity ────────────────────────────────────────────────────────────
 st.markdown("## 📽️ YOUR RECENT PHASE")
@@ -518,27 +550,6 @@ else:
     cols  = min(n, 5)
     cards = [recent_card(row, show_posters) for _, row in recent.iterrows()]
     render_grid(cards, cols=cols)
-
-# ── Show country profile in sidebar ───────────────────────────────────────────
-if country_profile:
-    with st.sidebar:
-        st.markdown("---")
-        st.markdown("#### 🌍 Your Country DNA")
-        for c, w in list(country_profile.items())[:6]:
-            flag = country_flag(c)
-            bar  = int(w * 100)
-            st.markdown(f"""
-            <div style='margin-bottom:6px'>
-              <div style='display:flex;justify-content:space-between;
-                          font-size:0.75rem;color:#BBB;margin-bottom:2px'>
-                <span>{flag} {c}</span>
-                <span style='color:#E50914'>{w:.0%}</span>
-              </div>
-              <div style='background:#1C1C1C;border-radius:3px;height:4px'>
-                <div style='background:#E50914;width:{bar}%;height:4px;border-radius:3px'></div>
-              </div>
-            </div>
-            """, unsafe_allow_html=True)
 
 # ── Recommendations ────────────────────────────────────────────────────────────
 st.markdown("---")
@@ -554,16 +565,17 @@ else:
         top_country = max(country_profile, key=country_profile.get)
         flag        = country_flag(top_country)
         st.markdown(
-            f"<p style='color:#555;font-size:0.8rem;margin-top:-0.5rem;'>"
-            f"{flag} Personalised for your love of <strong style='color:#9ECAFF'>"
-            f"{top_country}</strong> cinema &amp; more</p>",
+            "<p style='color:#555;font-size:0.8rem;margin-top:-0.5rem;'>"
+            + flag + " Personalised for your love of "
+            "<strong style='color:#9ECAFF'>" + top_country + "</strong>"
+            " cinema &amp; more</p>",
             unsafe_allow_html=True,
         )
 
     cards     = [rec_card(row, i + 1, show_posters) for i, (_, row) in enumerate(recs_ranked.iterrows())]
     all_cards = "".join(cards)
     st.markdown(
-        f'<div class="movie-grid cols-5">{all_cards}</div>',
+        '<div class="movie-grid cols-5">' + all_cards + "</div>",
         unsafe_allow_html=True,
     )
 
@@ -579,27 +591,28 @@ if genres:
         st.markdown("<br>", unsafe_allow_html=True)
         for genre, score in genres:
             bar_w = int(score * 100)
-            st.markdown(f"""
-            <div style='margin-bottom:8px'>
-              <div style='display:flex;justify-content:space-between;
-                          font-size:0.78rem;color:#BBB;margin-bottom:3px;font-family:Inter,sans-serif'>
-                <span>{genre}</span>
-                <span style='color:#E50914;font-weight:700'>{score:.0%}</span>
-              </div>
-              <div style='background:#1C1C1C;border-radius:4px;height:5px;overflow:hidden'>
-                <div style='background:linear-gradient(90deg,#B20710,#E50914);
-                            width:{bar_w}%;height:5px;border-radius:4px'></div>
-              </div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                "<div style='margin-bottom:8px'>"
+                "<div style='display:flex;justify-content:space-between;"
+                "font-size:0.78rem;color:#BBB;margin-bottom:3px;font-family:Inter,sans-serif'>"
+                "<span>" + genre + "</span>"
+                "<span style='color:#E50914;font-weight:700'>" + str(bar_w) + "%</span>"
+                "</div>"
+                "<div style='background:#1C1C1C;border-radius:4px;height:5px;overflow:hidden'>"
+                "<div style='background:linear-gradient(90deg,#B20710,#E50914);"
+                "width:" + str(bar_w) + "%;height:5px;border-radius:4px'></div>"
+                "</div></div>",
+                unsafe_allow_html=True,
+            )
 else:
     st.warning("Could not build a genre profile for this user.")
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
 st.markdown("---")
-st.markdown("""
-<div style='text-align:center;padding:1.5rem 0 0.5rem;
-            color:#222;font-size:0.72rem;font-family:Inter,sans-serif;letter-spacing:2px'>
-  CINEWRAP 2026 &nbsp;·&nbsp; CONTENT + COLLABORATIVE + POPULARITY + COUNTRY
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    "<div style='text-align:center;padding:1.5rem 0 0.5rem;"
+    "color:#222;font-size:0.72rem;font-family:Inter,sans-serif;letter-spacing:2px'>"
+    "CINEWRAP 2026 &nbsp;&middot;&nbsp; CONTENT + COLLABORATIVE + POPULARITY + COUNTRY"
+    "</div>",
+    unsafe_allow_html=True,
+)
