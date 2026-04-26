@@ -1,4 +1,4 @@
-# 🎬 MovieWrap — Hybrid Movie Recommender
+# 🎬 MovieWrap: Hybrid Movie Recommender
 
 A portfolio-grade hybrid recommender system built with Python + Streamlit, inspired by "Netflix Wrapped".
 
