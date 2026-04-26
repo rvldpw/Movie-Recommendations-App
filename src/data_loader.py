@@ -1,5 +1,5 @@
 import os
-import gdown
+import requests
 import pandas as pd
 
 FILE_ID = "1V7ZJu-kkslnaJ1KVI8yQ7qgMi0zsIQed"   # ← your new file
@@ -20,41 +20,69 @@ def _is_valid_parquet(path: str) -> bool:
     return magic == b"PAR1"
 
 
-def _download(file_id: str, dest: str) -> None:
-    """Download from Google Drive with two attempts and file validation."""
-
-    # Wipe any corrupt/partial file first
+def _download_from_drive(file_id: str, dest: str) -> None:
+    """
+    Stream a large Google Drive file to disk using requests only.
+    Handles the virus-scan confirmation page automatically.
+    No gdown dependency — works on all Python versions.
+    """
     if os.path.exists(dest):
         os.remove(dest)
 
-    # Attempt 1 — fuzzy mode handles most large files
-    url = f"https://drive.google.com/uc?id={file_id}"
-    print(f"[data_loader] Downloading dataset → {dest}")
-    gdown.download(url, dest, quiet=False, fuzzy=True)
+    session = requests.Session()
 
-    if _is_valid_parquet(dest):
-        return
+    # Step 1 — initial request (may get a confirm page for large files)
+    url = "https://drive.google.com/uc"
+    params = {"id": file_id, "export": "download"}
+    print(f"[data_loader] Connecting to Google Drive …")
+    response = session.get(url, params=params, stream=True, timeout=30)
+    response.raise_for_status()
 
-    # Attempt 2 — force-confirm to bypass Google's virus-scan warning page
-    if os.path.exists(dest):
-        os.remove(dest)
-    fallback_url = f"https://drive.google.com/uc?export=download&confirm=t&id={file_id}"
-    print("[data_loader] Retrying with confirm=t …")
-    gdown.download(fallback_url, dest, quiet=False, fuzzy=True)
+    # Step 2 — check if Google returned a confirmation page
+    # (happens for files > ~40 MB)
+    confirm_token = None
+    for key, value in response.cookies.items():
+        if key.startswith("download_warning"):
+            confirm_token = value
+            break
 
-    if _is_valid_parquet(dest):
-        return
+    # Also check the response URL for a confirm param (newer Drive behaviour)
+    if confirm_token is None and "confirm=" in response.url:
+        from urllib.parse import urlparse, parse_qs
+        qs = parse_qs(urlparse(response.url).query)
+        confirm_token = qs.get("confirm", [None])[0]
 
-    # Both failed — clean up and raise a readable error
-    if os.path.exists(dest):
-        os.remove(dest)
-    raise RuntimeError(
-        "\n\n[data_loader] Download failed — file is not a valid Parquet.\n"
-        "Check the following:\n"
-        "  1. Google Drive sharing is set to 'Anyone with the link can VIEW'.\n"
-        "  2. The daily download quota has not been exceeded (try again in 24 h).\n"
-        f"  3. FILE_ID is correct: {file_id}\n"
-    )
+    if confirm_token:
+        print("[data_loader] Got confirmation token — re-requesting …")
+        params["confirm"] = confirm_token
+        response = session.get(url, params=params, stream=True, timeout=30)
+        response.raise_for_status()
+
+    # Step 3 — stream to disk in 8 MB chunks
+    print(f"[data_loader] Downloading → {dest}")
+    chunk_size = 8 * 1024 * 1024  # 8 MB
+    bytes_written = 0
+    with open(dest, "wb") as f:
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            if chunk:
+                f.write(chunk)
+                bytes_written += len(chunk)
+                mb = bytes_written / (1024 * 1024)
+                print(f"[data_loader]   {mb:.0f} MB downloaded …", flush=True)
+
+    print(f"[data_loader] Download complete — {bytes_written / (1024**2):.1f} MB")
+
+    if not _is_valid_parquet(dest):
+        size_kb = os.path.getsize(dest) / 1024 if os.path.exists(dest) else 0
+        if os.path.exists(dest):
+            os.remove(dest)
+        raise RuntimeError(
+            f"\n\n[data_loader] Downloaded file is not a valid Parquet (got {size_kb:.0f} KB).\n"
+            "Possible causes:\n"
+            "  1. Google Drive sharing is NOT set to 'Anyone with the link — Viewer'.\n"
+            "  2. Daily download quota exceeded — try again in 24 hours.\n"
+            f"  3. FILE_ID is wrong: {file_id}\n"
+        )
 
 
 def load_data() -> pd.DataFrame:
@@ -65,7 +93,7 @@ def load_data() -> pd.DataFrame:
     os.makedirs("data", exist_ok=True)
 
     if not _is_valid_parquet(LOCAL_FILE):
-        _download(FILE_ID, LOCAL_FILE)
+        _download_from_drive(FILE_ID, LOCAL_FILE)
 
     df = pd.read_parquet(LOCAL_FILE)
 
@@ -77,4 +105,5 @@ def load_data() -> pd.DataFrame:
     # Unix timestamp → datetime
     df["datetime"] = pd.to_datetime(df["timestamp"], unit="s")
 
+    return df
     return df
