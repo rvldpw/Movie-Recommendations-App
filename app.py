@@ -467,122 +467,155 @@ user_input = st.text_input(
 if not user_input:
     st.markdown("""
     <style>
-      .filmstrip-reel { display:flex; gap:3px; animation:scroll-strip 3s linear infinite; }
-      .film-hole { width:18px;height:26px;border-radius:3px;background:#1a1a1a;border:1px solid #2a2a2a;flex-shrink:0; }
-      .film-frame { width:36px;height:26px;border-radius:2px;background:#111;border:1px solid #222;flex-shrink:0;position:relative;overflow:hidden; }
-      .film-frame::after { content:'';position:absolute;inset:3px;border-radius:1px;background:linear-gradient(135deg,#1c1c1c,#0a0a0a); }
-      @keyframes scroll-strip { 0%{transform:translateX(0)} 100%{transform:translateX(-39px)} }
-
-      .clapper-body { width:86px;height:78px;background:#1a1a1a;border:2px solid #2e2e2e;border-radius:6px;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px; }
-      .clapper-lines { position:absolute;top:0;left:0;right:0;height:20px;border-radius:4px 4px 0 0;overflow:hidden;background:#111; }
-      .clapper-stripe { height:100%;display:flex; }
-      .stripe-seg { flex:1;height:100%; }
-      .stripe-seg:nth-child(odd)  { background:#E50914; }
-      .stripe-seg:nth-child(even) { background:#1a1a1a; }
-      .clapper-top { position:absolute;top:-2px;left:-2px;right:-2px;height:22px;background:#111;border:2px solid #2e2e2e;border-radius:4px;overflow:hidden;transform-origin:left center;animation:clap 2.4s ease-in-out infinite; }
-      .clapper-top .stripe-seg:nth-child(even) { background:#111; }
-      @keyframes clap { 0%,60%{transform:rotate(0deg)} 70%{transform:rotate(-32deg)} 80%{transform:rotate(0deg)} 85%{transform:rotate(-8deg)} 92%{transform:rotate(0deg)} 100%{transform:rotate(0deg)} }
-      .clapper-dot { width:7px;height:7px;border-radius:50%;background:#E50914;box-shadow:0 0 6px rgba(229,9,20,0.5);animation:pulse-dot 1.2s ease-in-out infinite; }
-      @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
-
-      .star { position:absolute;width:4px;height:4px;border-radius:50%;background:#E50914;animation:orbit-star var(--dur,3s) linear infinite;animation-delay:var(--delay,0s);opacity:0; }
-      @keyframes orbit-star { 0%{transform:rotate(var(--ang)) translateX(var(--r)) scale(0);opacity:0} 15%{opacity:1} 85%{opacity:0.6} 100%{transform:rotate(var(--ang)) translateX(calc(var(--r) + 30px)) scale(0.5);opacity:0} }
-
-      .idle-title { font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:6px;color:#333;animation:fade-title 3s ease-in-out infinite alternate; }
-      @keyframes fade-title { from{color:#2a2a2a} to{color:#444} }
-      .idle-sub { font-family:'Inter',sans-serif;font-size:0.8rem;color:#252525;letter-spacing:2px;text-transform:uppercase;animation:fade-sub 3s ease-in-out infinite alternate-reverse; }
-      @keyframes fade-sub { from{opacity:0.5} to{opacity:1} }
-
-      .milestone-badge { display:flex;align-items:center;gap:6px;background:#111;border:1px solid #1e1e1e;border-radius:20px;padding:5px 14px 5px 10px;opacity:0;animation:pop-badge 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
-      .milestone-badge:nth-child(1){animation-delay:0.2s} .milestone-badge:nth-child(2){animation-delay:0.45s} .milestone-badge:nth-child(3){animation-delay:0.7s}
-      @keyframes pop-badge { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-      .badge-label { font-family:'Inter',sans-serif;font-size:0.7rem;color:#555;letter-spacing:1px;text-transform:uppercase; }
-
-      .ticker-wrap { overflow:hidden;width:100%;height:22px;position:relative; }
-      .ticker-wrap::before,.ticker-wrap::after { content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2; }
-      .ticker-wrap::before { left:0;background:linear-gradient(90deg,#0A0A0A,transparent); }
-      .ticker-wrap::after  { right:0;background:linear-gradient(-90deg,#0A0A0A,transparent); }
-      .ticker-inner { display:flex;white-space:nowrap;animation:ticker-scroll 18s linear infinite; }
-      .ticker-item { font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:3px;color:#1e1e1e;padding:0 20px; }
-      .ticker-sep  { color:#E50914;font-size:0.55rem;opacity:0.5; }
-      @keyframes ticker-scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap');
+    .cw-stage{background:#0A0A0A;min-height:460px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;position:relative;overflow:hidden;border-radius:16px;margin:1rem 0}
+    .cw-scanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent,transparent 3px,rgba(255,255,255,0.012) 3px,rgba(255,255,255,0.012) 4px);border-radius:16px}
+    .cw-reel-row{display:flex;align-items:center;gap:0;margin-bottom:2.4rem;overflow:hidden;width:100%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 60px,#000 calc(100% - 60px),transparent);mask-image:linear-gradient(90deg,transparent,#000 60px,#000 calc(100% - 60px),transparent)}
+    .cw-reel-track{display:flex;gap:0;animation:cwReelMove 6s linear infinite}
+    .cw-reel-hole{width:14px;height:20px;background:#0A0A0A;border:1px solid #1a1a1a;border-radius:2px;flex-shrink:0}
+    .cw-reel-cell{width:56px;height:36px;background:#0f0f0f;border:1px solid #161616;flex-shrink:0;position:relative;overflow:hidden}
+    .cw-reel-cell::after{content:'';position:absolute;inset:4px;background:#0a0a0a;border-radius:1px}
+    .cw-reel-cell.cw-lit{border-color:#1c1c1c}
+    .cw-reel-cell.cw-lit::after{background:linear-gradient(135deg,#181818,#0d0d0d)}
+    @keyframes cwReelMove{0%{transform:translateX(0)}100%{transform:translateX(-71px)}}
+    .cw-beam-wrap{position:absolute;top:0;left:50%;width:320px;transform:translateX(-50%);height:240px;pointer-events:none;overflow:hidden}
+    .cw-beam{position:absolute;top:0;left:50%;width:0;height:0;border-left:100px solid transparent;border-right:100px solid transparent;border-top:240px solid rgba(229,9,20,0.028);transform:translateX(-50%);animation:cwBeamPulse 3.5s ease-in-out infinite}
+    @keyframes cwBeamPulse{0%,100%{opacity:0.5}50%{opacity:1}}
+    .cw-icon-stage{position:relative;width:84px;height:84px;margin-bottom:1.8rem;flex-shrink:0}
+    .cw-ring{position:absolute;inset:0;border-radius:50%;border:1px solid #1e1e1e;animation:cwRingSpin 12s linear infinite}
+    .cw-ring:nth-child(2){animation-duration:8s;animation-direction:reverse;inset:6px;border-color:#E50914;border-width:1px;border-style:dashed;opacity:0.3}
+    .cw-ring:nth-child(3){animation-duration:18s;inset:12px;border-color:#2a2a2a}
+    @keyframes cwRingSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .cw-icon-center{position:absolute;inset:18px;border-radius:50%;background:#0f0f0f;border:1px solid #1e1e1e;display:flex;align-items:center;justify-content:center}
+    .cw-play{width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:16px solid #E50914;margin-left:3px;animation:cwPlayPulse 2s ease-in-out infinite}
+    @keyframes cwPlayPulse{0%,100%{opacity:0.7}50%{opacity:1}}
+    .cw-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:8px;color:#1e1e1e;margin-bottom:0.3rem;animation:cwTitleBreathe 4s ease-in-out infinite}
+    @keyframes cwTitleBreathe{0%,100%{color:#1e1e1e;letter-spacing:8px}50%{color:#2d2d2d;letter-spacing:9px}}
+    .cw-sub{font-family:'Inter',sans-serif;font-size:0.72rem;letter-spacing:3px;color:#222;text-transform:uppercase;margin-bottom:2rem;animation:cwSubBreathe 4s ease-in-out infinite alternate}
+    @keyframes cwSubBreathe{from{opacity:0.6}to{opacity:1}}
+    .cw-stat-row{display:flex;gap:1px;margin-bottom:2rem}
+    .cw-stat{background:#0f0f0f;border:1px solid #141414;border-radius:8px;padding:0.7rem 1.2rem;text-align:center;min-width:90px;opacity:0;animation:cwStatIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
+    .cw-stat:nth-child(1){animation-delay:0.1s;border-right:none;border-radius:8px 0 0 8px}
+    .cw-stat:nth-child(2){animation-delay:0.25s;border-radius:0}
+    .cw-stat:nth-child(3){animation-delay:0.4s;border-left:none;border-radius:0 8px 8px 0}
+    @keyframes cwStatIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .cw-num{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#E50914;letter-spacing:2px;line-height:1}
+    .cw-lbl{font-family:'Inter',sans-serif;font-size:0.58rem;color:#2d2d2d;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+    .cw-ticker-shell{width:100%;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 50px,#000 calc(100% - 50px),transparent);mask-image:linear-gradient(90deg,transparent,#000 50px,#000 calc(100% - 50px),transparent)}
+    .cw-ticker-track{display:flex;white-space:nowrap;animation:cwTick 24s linear infinite}
+    .cw-t-item{font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:3px;color:#181818;padding:0 18px}
+    .cw-t-dot{color:#E50914;opacity:0.2;font-size:0.5rem;padding:0 2px}
+    @keyframes cwTick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    .cw-particle{position:absolute;width:3px;height:3px;border-radius:50%;background:#E50914;pointer-events:none;opacity:0}
+    @keyframes cwPFly{0%{opacity:0;transform:translate(0,0) scale(0)}15%{opacity:0.8}85%{opacity:0.3}100%{opacity:0;transform:translate(var(--cw-dx),var(--cw-dy)) scale(0.3)}}
     </style>
 
-    <div style='text-align:center;padding:3rem 0 2rem;'>
-      <!-- Film strip -->
-      <div style='display:flex;justify-content:center;overflow:hidden;margin-bottom:2.2rem;'>
-        <div class="filmstrip-reel" id="fstrip"></div>
+    <div class="cw-stage" id="cwStage">
+      <div class="cw-scanlines"></div>
+      <div class="cw-beam-wrap"><div class="cw-beam"></div></div>
+
+      <div class="cw-reel-row"><div class="cw-reel-track" id="cwReelTrack"></div></div>
+
+      <div class="cw-icon-stage" id="cwIconStage">
+        <div class="cw-ring"></div>
+        <div class="cw-ring"></div>
+        <div class="cw-ring"></div>
+        <div class="cw-icon-center"><div class="cw-play"></div></div>
       </div>
 
-      <!-- Clapperboard -->
-      <div style='position:relative;display:inline-block;margin-bottom:1.6rem;'>
-        <div style='position:absolute;top:50%;left:50%;width:0;height:0;' id="starField"></div>
-        <div class='clapper-body'>
-          <div class='clapper-lines'><div class='clapper-stripe'>
-            <div class='stripe-seg'></div><div class='stripe-seg'></div>
-            <div class='stripe-seg'></div><div class='stripe-seg'></div>
-            <div class='stripe-seg'></div><div class='stripe-seg'></div>
-          </div></div>
-          <div class='clapper-top'><div class='clapper-stripe'>
-            <div class='stripe-seg'></div><div class='stripe-seg'></div>
-            <div class='stripe-seg'></div><div class='stripe-seg'></div>
-            <div class='stripe-seg'></div><div class='stripe-seg'></div>
-          </div></div>
-          <div class='clapper-dot'></div>
-        </div>
+      <div class="cw-title">ENTER YOUR USER ID</div>
+      <div class="cw-sub">Your personalised movie wrap is waiting</div>
+
+      <div class="cw-stat-row">
+        <div class="cw-stat"><div class="cw-num" id="cwN1">0</div><div class="cw-lbl">Films Rated</div></div>
+        <div class="cw-stat"><div class="cw-num" id="cwN2">0</div><div class="cw-lbl">Genres Found</div></div>
+        <div class="cw-stat"><div class="cw-num" id="cwN3">0</div><div class="cw-lbl">Countries</div></div>
       </div>
 
-      <div class='idle-title'>ENTER YOUR USER ID ABOVE</div>
-      <div class='idle-sub'>Your personalised movie wrap is waiting</div>
-
-      <!-- Milestone badges -->
-      <div style='display:flex;justify-content:center;gap:12px;margin-top:2rem;flex-wrap:wrap;'>
-        <div class='milestone-badge'><span style='font-size:13px'>&#9733;</span><span class='badge-label'>Taste Mapped</span></div>
-        <div class='milestone-badge'><span style='font-size:13px'>&#9654;</span><span class='badge-label'>Smart Picks</span></div>
-        <div class='milestone-badge'><span style='font-size:13px'>&#127758;</span><span class='badge-label'>Country DNA</span></div>
-      </div>
-
-      <!-- Scrolling ticker -->
-      <div class='ticker-wrap' style='margin-top:1.5rem;'>
-        <div class='ticker-inner' id="ticker"></div>
-      </div>
+      <div class="cw-ticker-shell"><div class="cw-ticker-track" id="cwTicker"></div></div>
     </div>
 
     <script>
-      (function() {
-        // Film strip
-        const fs = document.getElementById('fstrip');
-        if (fs) {
-          for (let i = 0; i < 11; i++) {
-            fs.innerHTML += '<div class="film-hole"></div>';
-            if (i < 10) fs.innerHTML += '<div class="film-frame"></div>';
+    (function(){
+      var reel = document.getElementById('cwReelTrack');
+      if(reel){
+        for(var i=0;i<24;i++){
+          var h=document.createElement('div'); h.className='cw-reel-hole'; reel.appendChild(h);
+          var c=document.createElement('div'); c.className='cw-reel-cell'+(i%3===1?' cw-lit':''); reel.appendChild(c);
+        }
+        var hx=document.createElement('div'); hx.className='cw-reel-hole'; reel.appendChild(hx);
+      }
+
+      var ticker=document.getElementById('cwTicker');
+      if(ticker){
+        var films=['PARASITE','INCEPTION','SPIRITED AWAY','THE GODFATHER','OLDBOY','MULHOLLAND DRIVE','AMÉLIE','BLADE RUNNER 2049','2001: A SPACE ODYSSEY','GOODFELLAS','PRINCESS MONONOKE','THE DARK KNIGHT','CITY OF GOD','HEAT','FARGO','AKIRA','NOSFERATU','METROPOLIS','WILD STRAWBERRIES','BREATHLESS'];
+        var doubled=films.concat(films);
+        doubled.forEach(function(f,i){
+          var s=document.createElement('span'); s.className='cw-t-item'; s.textContent=f; ticker.appendChild(s);
+          if(i<doubled.length-1){var d=document.createElement('span');d.className='cw-t-dot';d.textContent='◆';ticker.appendChild(d);}
+        });
+      }
+
+      var stage=document.getElementById('cwStage');
+      var is=document.getElementById('cwIconStage');
+      if(stage && is){
+        var stageRect=stage.getBoundingClientRect();
+        var isRect=is.getBoundingClientRect();
+        var cx=isRect.left - stageRect.left + 42;
+        var cy=isRect.top  - stageRect.top  + 42;
+        function spawnParticle(){
+          var p=document.createElement('div'); p.className='cw-particle';
+          var angle=Math.random()*Math.PI*2;
+          var dist=55+Math.random()*90;
+          var dx=Math.cos(angle)*dist, dy=Math.sin(angle)*dist;
+          var dur=(1.8+Math.random()*1.4).toFixed(2);
+          p.style.cssText='left:'+(cx+Math.cos(angle)*8)+'px;top:'+(cy+Math.sin(angle)*8)+'px;--cw-dx:'+dx.toFixed(1)+'px;--cw-dy:'+dy.toFixed(1)+'px;animation:cwPFly '+dur+'s ease-out forwards';
+          stage.appendChild(p);
+          setTimeout(function(){if(p.parentNode)p.parentNode.removeChild(p);},parseFloat(dur)*1000+100);
+        }
+        setInterval(spawnParticle, 210);
+
+        var dots=[];
+        for(var i=0;i<8;i++){
+          var dot=document.createElement('div');
+          dot.style.cssText='width:4px;height:4px;border-radius:50%;background:#E50914;position:absolute;top:50%;left:50%;margin:-2px;pointer-events:none;';
+          is.appendChild(dot);
+          dots.push({el:dot, offset:(i/8)*Math.PI*2});
+        }
+        var frame=0;
+        function animDots(){
+          frame+=0.016;
+          for(var i=0;i<dots.length;i++){
+            var a=dots[i].offset+frame;
+            var r=32;
+            var x=(Math.cos(a)*r).toFixed(2);
+            var y=(Math.sin(a)*r).toFixed(2);
+            dots[i].el.style.transform='translate(calc(-50% + '+x+'px), calc(-50% + '+y+'px))';
+            dots[i].el.style.opacity=(0.25+0.55*((Math.sin(a*2+i)*0.5)+0.5)).toFixed(2);
           }
+          requestAnimationFrame(animDots);
         }
-        // Orbiting stars
-        const sf = document.getElementById('starField');
-        if (sf) {
-          const angs=[0,45,90,135,180,225,270,315,22,67,112,157,202,247,292,337];
-          const radii=[42,55,38,60,45,52,40,58,48,35,62,44,56,39,50,65];
-          const delays=[0,0.4,0.8,1.2,1.6,2.0,0.2,0.6,1.0,1.4,1.8,0.3,0.7,1.1,1.5,1.9];
-          const durs=[2.8,3.2,2.5,3.5,2.9,3.1,2.6,3.4,2.7,3.3,2.4,3.0,2.8,3.2,2.5,3.6];
-          angs.forEach((a,i)=>{
-            const s=document.createElement('div');
-            s.className='star';
-            s.style.cssText='--ang:'+a+'deg;--r:'+radii[i]+'px;--delay:'+delays[i]+'s;--dur:'+durs[i]+'s';
-            sf.appendChild(s);
-          });
-        }
-        // Ticker
-        const ticker=document.getElementById('ticker');
-        if (ticker) {
-          const films=['INCEPTION','THE GODFATHER','PARASITE','INTERSTELLAR','SPIRITED AWAY','PULP FICTION','OLDBOY','THE DARK KNIGHT','CIDADE DE DEUS','AMÉLIE','2001: A SPACE ODYSSEY','MULHOLLAND DRIVE','BLADE RUNNER','AKIRA','GOODFELLAS','PRINCESS MONONOKE','FARGO','HEAT','NOSFERATU','METROPOLIS'];
-          const doubled=[...films,...films];
-          doubled.forEach((f,i)=>{
-            ticker.innerHTML+='<span class="ticker-item">'+f+'</span>';
-            if(i<doubled.length-1) ticker.innerHTML+='<span class="ticker-item ticker-sep">&#9670;</span>';
-          });
-        }
-      })();
+        animDots();
+      }
+
+      var statDefs=[
+        {id:'cwN1', lo:120,  hi:4200},
+        {id:'cwN2', lo:8,    hi:25},
+        {id:'cwN3', lo:6,    hi:40}
+      ];
+      statDefs.forEach(function(s){
+        var el=document.getElementById(s.id);
+        if(!el) return;
+        var target=s.lo+Math.floor(Math.random()*(s.hi-s.lo));
+        var v=s.lo;
+        var step=Math.max(1,Math.ceil((target-s.lo)/28));
+        var iv=setInterval(function(){
+          v=Math.min(v+step, target);
+          el.textContent=v.toLocaleString();
+          if(v>=target) clearInterval(iv);
+        },38);
+      });
+    })();
     </script>
     """, unsafe_allow_html=True)
     st.stop()
