@@ -214,9 +214,72 @@ p, li, span { color:#BBB !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── OMDb (unchanged) ──────────────────────────────────────────────────────────
+# ── OMDb improved with year extraction ─────────────────────────────────────────
 OMDB_API_KEY = "trilogy"
 PLACEHOLDER  = "https://placehold.co/400x600/141414/333333?text=No+Poster"
+
+# Helper to split title and year
+def split_title_year(title_str: str):
+    """
+    Returns (clean_title, year_or_None)
+    e.g. "Fight Club (1999)" -> ("Fight Club", "1999")
+         "Idiocracy"         -> ("Idiocracy", None)
+    """
+    title_str = title_str.strip()
+    if '(' in title_str and ')' in title_str:
+        # Find last occurrence of '('...')' assuming it's the year
+        start = title_str.rfind('(')
+        end = title_str.rfind(')')
+        if start != -1 and end != -1 and end > start:
+            year_candidate = title_str[start+1:end].strip()
+            if year_candidate.isdigit() and len(year_candidate) == 4:
+                clean_title = title_str[:start].strip()
+                return clean_title, year_candidate
+    return title_str, None
+
+@st.cache_data(show_spinner=False, ttl=86400)
+def fetch_movie_info(title: str) -> dict:
+    """
+    Fetch movie info from OMDb using title and optional year.
+    Returns dict with poster, imdb, year, genre, country.
+    """
+    clean_title, year = split_title_year(title)
+    params = {"t": clean_title, "apikey": OMDB_API_KEY}
+    if year:
+        params["y"] = year
+
+    try:
+        r = requests.get("https://www.omdbapi.com/", params=params, timeout=4)
+        data = r.json()
+        if data.get("Response") == "True":
+            poster_url = data.get("Poster", "")
+            # Sometimes OMDb returns "N/A" or an empty string
+            if poster_url and poster_url != "N/A":
+                poster = poster_url
+            else:
+                poster = ""
+            return {
+                "poster":  poster,
+                "imdb":    data.get("imdbRating", "N/A"),
+                "year":    data.get("Year", ""),
+                "genre":   data.get("Genre", ""),
+                "country": data.get("Country", ""),
+            }
+    except Exception:
+        pass
+    return {"poster": "", "imdb": "N/A", "year": "", "genre": "", "country": ""}
+
+def safe_poster(title: str):
+    """Return (poster_url, imdb_rating) with fallback placeholder."""
+    info = fetch_movie_info(title)
+    url = info["poster"] if info["poster"] else PLACEHOLDER
+    return url, info["imdb"]
+
+def get_movie_country(title: str) -> str:
+    """Return primary country string for the movie."""
+    info = fetch_movie_info(title)
+    raw = info.get("country", "") or ""
+    return raw.split(",")[0].strip() if raw else ""
 
 COUNTRY_FLAGS = {
     "USA": "🇺🇸", "United States": "🇺🇸", "UK": "🇬🇧", "United Kingdom": "🇬🇧",
