@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── CSS ────────────────────────────────────────────────────────────────────────
+# ── CSS (unchanged) ────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap');
@@ -214,7 +214,7 @@ p, li, span { color:#BBB !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── OMDb ───────────────────────────────────────────────────────────────────────
+# ── OMDb (unchanged) ──────────────────────────────────────────────────────────
 OMDB_API_KEY = "trilogy"
 PLACEHOLDER  = "https://placehold.co/400x600/141414/333333?text=No+Poster"
 
@@ -272,7 +272,7 @@ def get_movie_country(title: str) -> str:
     raw  = info.get("country", "") or ""
     return raw.split(",")[0].strip() if raw else ""
 
-# ── Country profile ────────────────────────────────────────────────────────────
+# ── Country profile (unchanged) ────────────────────────────────────────────────
 def build_country_profile(recent_df: pd.DataFrame) -> dict:
     counter: Counter = Counter()
     for _, row in recent_df.iterrows():
@@ -312,7 +312,7 @@ def rerank_with_country(recs_df: pd.DataFrame, profile: dict) -> pd.DataFrame:
     result["score"]   = new_scores
     return result.sort_values("score", ascending=False).reset_index(drop=True)
 
-# ── Username generator ─────────────────────────────────────────────────────────
+# ── Username generator (unchanged) ─────────────────────────────────────────────
 _USER_ADJ = [
     "Silent","Cosmic","Neon","Crimson","Golden","Shadow","Electric","Frozen","Blazing","Midnight",
     "Velvet","Phantom","Stellar","Iron","Solar","Lunar","Obsidian","Silver","Radiant","Quantum",
@@ -343,13 +343,9 @@ def auto_username(user_id: int) -> str:
     rng = random.Random(int(user_id))
     return f"{rng.choice(_USER_ADJ)}{rng.choice(_USER_NOUN)}{user_id % 100:02d}"
 
-# ── Card helpers ───────────────────────────────────────────────────────────────
+# ── Card helpers (unchanged) ───────────────────────────────────────────────────
 def _card_wrap(inner: str) -> str:
-    return (
-        '<div class="poster-card">'
-        + inner
-        + '</div>'
-    )
+    return '<div class="poster-card">' + inner + '</div>'
 
 def recent_card(row, show_posters: bool) -> str:
     img, imdb = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
@@ -411,7 +407,7 @@ def render_grid(cards: list, cols: int = 5) -> None:
         unsafe_allow_html=True,
     )
 
-# ── Load system ────────────────────────────────────────────────────────────────
+# ── Load system (unchanged) ────────────────────────────────────────────────────
 @st.cache_resource(show_spinner="🎬 Starting up CineWrap…")
 def load_system() -> RecommenderSystem:
     df    = load_data()
@@ -421,7 +417,7 @@ def load_system() -> RecommenderSystem:
 
 system = load_system()
 
-# ── Hero ───────────────────────────────────────────────────────────────────────
+# ── Hero (unchanged) ───────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero">
   <div class="year-pill">2026 EDITION</div>
@@ -430,7 +426,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── Sidebar ────────────────────────────────────────────────────────────────────
+# ── Sidebar (unchanged) ────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### 🎬 CineWrap 2026")
     st.markdown(
@@ -457,14 +453,24 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# ── User ID input ──────────────────────────────────────────────────────────────
-user_input = st.text_input(
-    "🔍 User ID",
-    placeholder="Enter your User ID — e.g. 99476",
-    label_visibility="visible",
-)
+# ========================= SEARCH FORM WITH BUTTON ==============================
+st.markdown("#### 🔍 Find your CineWrap")
 
-if not user_input:
+# Use a form so that both Enter and the button trigger the search
+with st.form(key="user_search_form"):
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        user_input = st.text_input(
+            "User ID",
+            placeholder="e.g. 99476",
+            label_visibility="collapsed",
+        )
+    with col2:
+        submitted = st.form_submit_button("Search", type="primary", use_container_width=True)
+
+# ================ Handle empty / invalid input ==================================
+if not submitted or not user_input.strip():
+    # Show the animated placeholder (exactly as before)
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap');
@@ -621,6 +627,7 @@ if not user_input:
     """, unsafe_allow_html=True)
     st.stop()
 
+# ================ Process valid user ID =========================================
 try:
     user_id = int(user_input.strip())
 except ValueError:
@@ -631,6 +638,7 @@ if not system.user_exists(user_id):
     st.error(f"User **{user_id}** not found. Please create a Netflix account at https://www.netflix.com/.")
     st.stop()
 
+# Username & profile header
 username = auto_username(user_id)
 st.markdown(
     "<div style='display:flex;align-items:center;gap:1rem;"
@@ -660,7 +668,7 @@ with st.spinner("🌍 Learning your country preferences…"):
     full_history    = system.get_recent_activity(user_id, top_n=200)
     country_profile = build_country_profile(full_history) if country_boost_enabled else {}
 
-# ── Country DNA in sidebar ─────────────────────────────────────────────────────
+# ── Country DNA in sidebar (unchanged) ─────────────────────────────────────────
 if country_profile:
     with st.sidebar:
         st.markdown("---")
@@ -681,7 +689,7 @@ if country_profile:
                 unsafe_allow_html=True,
             )
 
-# ── Recent Activity ────────────────────────────────────────────────────────────
+# ── Recent Activity (unchanged) ────────────────────────────────────────────────
 st.markdown("## 📽️ YOUR RECENT PHASE")
 if recent.empty:
     st.warning("No watch history found for this user.")
@@ -691,7 +699,7 @@ else:
     cards = [recent_card(row, show_posters) for _, row in recent.iterrows()]
     render_grid(cards, cols=cols)
 
-# ── Recommendations ────────────────────────────────────────────────────────────
+# ── Recommendations (unchanged) ─────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("## 🍿 PICKED FOR YOU")
 
@@ -719,7 +727,7 @@ else:
         unsafe_allow_html=True,
     )
 
-# ── Taste DNA ──────────────────────────────────────────────────────────────────
+# ── Taste DNA (unchanged) ──────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("## 🧬 YOUR TASTE DNA")
 if genres:
@@ -747,7 +755,7 @@ if genres:
 else:
     st.warning("Could not build a genre profile for this user.")
 
-# ── Footer ─────────────────────────────────────────────────────────────────────
+# ── Footer (unchanged) ─────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown(
     "<div style='text-align:center;padding:1.5rem 0 0.5rem;"
