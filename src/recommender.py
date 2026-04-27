@@ -15,9 +15,9 @@ class RecommenderSystem:
     """Hybrid movie recommender (content + collaborative + popularity)."""
 
     # Blending weights — must sum to 1.0
-    W_CF = 0.40
-    W_CONTENT = 0.35
-    W_POPULAR = 0.25
+    W_CF = 0.50
+    W_CONTENT = 0.30
+    W_POPULAR = 0.20
 
     def __init__(self, df: pd.DataFrame):
         self.df = df.copy()
