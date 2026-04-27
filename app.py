@@ -466,16 +466,124 @@ user_input = st.text_input(
 
 if not user_input:
     st.markdown("""
-    <div style='text-align:center;padding:5rem 0 3rem;'>
-      <div style='font-size:4rem'>&#127916;</div>
-      <div style='font-family:Bebas Neue,sans-serif;font-size:1.6rem;
-                  letter-spacing:4px;color:#333;margin-top:1.2rem;'>
-        ENTER YOUR USER ID ABOVE
+    <style>
+      .filmstrip-reel { display:flex; gap:3px; animation:scroll-strip 3s linear infinite; }
+      .film-hole { width:18px;height:26px;border-radius:3px;background:#1a1a1a;border:1px solid #2a2a2a;flex-shrink:0; }
+      .film-frame { width:36px;height:26px;border-radius:2px;background:#111;border:1px solid #222;flex-shrink:0;position:relative;overflow:hidden; }
+      .film-frame::after { content:'';position:absolute;inset:3px;border-radius:1px;background:linear-gradient(135deg,#1c1c1c,#0a0a0a); }
+      @keyframes scroll-strip { 0%{transform:translateX(0)} 100%{transform:translateX(-39px)} }
+
+      .clapper-body { width:86px;height:78px;background:#1a1a1a;border:2px solid #2e2e2e;border-radius:6px;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px; }
+      .clapper-lines { position:absolute;top:0;left:0;right:0;height:20px;border-radius:4px 4px 0 0;overflow:hidden;background:#111; }
+      .clapper-stripe { height:100%;display:flex; }
+      .stripe-seg { flex:1;height:100%; }
+      .stripe-seg:nth-child(odd)  { background:#E50914; }
+      .stripe-seg:nth-child(even) { background:#1a1a1a; }
+      .clapper-top { position:absolute;top:-2px;left:-2px;right:-2px;height:22px;background:#111;border:2px solid #2e2e2e;border-radius:4px;overflow:hidden;transform-origin:left center;animation:clap 2.4s ease-in-out infinite; }
+      .clapper-top .stripe-seg:nth-child(even) { background:#111; }
+      @keyframes clap { 0%,60%{transform:rotate(0deg)} 70%{transform:rotate(-32deg)} 80%{transform:rotate(0deg)} 85%{transform:rotate(-8deg)} 92%{transform:rotate(0deg)} 100%{transform:rotate(0deg)} }
+      .clapper-dot { width:7px;height:7px;border-radius:50%;background:#E50914;box-shadow:0 0 6px rgba(229,9,20,0.5);animation:pulse-dot 1.2s ease-in-out infinite; }
+      @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+
+      .star { position:absolute;width:4px;height:4px;border-radius:50%;background:#E50914;animation:orbit-star var(--dur,3s) linear infinite;animation-delay:var(--delay,0s);opacity:0; }
+      @keyframes orbit-star { 0%{transform:rotate(var(--ang)) translateX(var(--r)) scale(0);opacity:0} 15%{opacity:1} 85%{opacity:0.6} 100%{transform:rotate(var(--ang)) translateX(calc(var(--r) + 30px)) scale(0.5);opacity:0} }
+
+      .idle-title { font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:6px;color:#333;animation:fade-title 3s ease-in-out infinite alternate; }
+      @keyframes fade-title { from{color:#2a2a2a} to{color:#444} }
+      .idle-sub { font-family:'Inter',sans-serif;font-size:0.8rem;color:#252525;letter-spacing:2px;text-transform:uppercase;animation:fade-sub 3s ease-in-out infinite alternate-reverse; }
+      @keyframes fade-sub { from{opacity:0.5} to{opacity:1} }
+
+      .milestone-badge { display:flex;align-items:center;gap:6px;background:#111;border:1px solid #1e1e1e;border-radius:20px;padding:5px 14px 5px 10px;opacity:0;animation:pop-badge 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+      .milestone-badge:nth-child(1){animation-delay:0.2s} .milestone-badge:nth-child(2){animation-delay:0.45s} .milestone-badge:nth-child(3){animation-delay:0.7s}
+      @keyframes pop-badge { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+      .badge-label { font-family:'Inter',sans-serif;font-size:0.7rem;color:#555;letter-spacing:1px;text-transform:uppercase; }
+
+      .ticker-wrap { overflow:hidden;width:100%;height:22px;position:relative; }
+      .ticker-wrap::before,.ticker-wrap::after { content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2; }
+      .ticker-wrap::before { left:0;background:linear-gradient(90deg,#0A0A0A,transparent); }
+      .ticker-wrap::after  { right:0;background:linear-gradient(-90deg,#0A0A0A,transparent); }
+      .ticker-inner { display:flex;white-space:nowrap;animation:ticker-scroll 18s linear infinite; }
+      .ticker-item { font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:3px;color:#1e1e1e;padding:0 20px; }
+      .ticker-sep  { color:#E50914;font-size:0.55rem;opacity:0.5; }
+      @keyframes ticker-scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    </style>
+
+    <div style='text-align:center;padding:3rem 0 2rem;'>
+      <!-- Film strip -->
+      <div style='display:flex;justify-content:center;overflow:hidden;margin-bottom:2.2rem;'>
+        <div class="filmstrip-reel" id="fstrip"></div>
       </div>
-      <div style='color:#2A2A2A;font-size:0.85rem;margin-top:0.4rem;'>
-        Your personalised movie wrap is waiting
+
+      <!-- Clapperboard -->
+      <div style='position:relative;display:inline-block;margin-bottom:1.6rem;'>
+        <div style='position:absolute;top:50%;left:50%;width:0;height:0;' id="starField"></div>
+        <div class='clapper-body'>
+          <div class='clapper-lines'><div class='clapper-stripe'>
+            <div class='stripe-seg'></div><div class='stripe-seg'></div>
+            <div class='stripe-seg'></div><div class='stripe-seg'></div>
+            <div class='stripe-seg'></div><div class='stripe-seg'></div>
+          </div></div>
+          <div class='clapper-top'><div class='clapper-stripe'>
+            <div class='stripe-seg'></div><div class='stripe-seg'></div>
+            <div class='stripe-seg'></div><div class='stripe-seg'></div>
+            <div class='stripe-seg'></div><div class='stripe-seg'></div>
+          </div></div>
+          <div class='clapper-dot'></div>
+        </div>
+      </div>
+
+      <div class='idle-title'>ENTER YOUR USER ID ABOVE</div>
+      <div class='idle-sub'>Your personalised movie wrap is waiting</div>
+
+      <!-- Milestone badges -->
+      <div style='display:flex;justify-content:center;gap:12px;margin-top:2rem;flex-wrap:wrap;'>
+        <div class='milestone-badge'><span style='font-size:13px'>&#9733;</span><span class='badge-label'>Taste Mapped</span></div>
+        <div class='milestone-badge'><span style='font-size:13px'>&#9654;</span><span class='badge-label'>Smart Picks</span></div>
+        <div class='milestone-badge'><span style='font-size:13px'>&#127758;</span><span class='badge-label'>Country DNA</span></div>
+      </div>
+
+      <!-- Scrolling ticker -->
+      <div class='ticker-wrap' style='margin-top:1.5rem;'>
+        <div class='ticker-inner' id="ticker"></div>
       </div>
     </div>
+
+    <script>
+      (function() {
+        // Film strip
+        const fs = document.getElementById('fstrip');
+        if (fs) {
+          for (let i = 0; i < 11; i++) {
+            fs.innerHTML += '<div class="film-hole"></div>';
+            if (i < 10) fs.innerHTML += '<div class="film-frame"></div>';
+          }
+        }
+        // Orbiting stars
+        const sf = document.getElementById('starField');
+        if (sf) {
+          const angs=[0,45,90,135,180,225,270,315,22,67,112,157,202,247,292,337];
+          const radii=[42,55,38,60,45,52,40,58,48,35,62,44,56,39,50,65];
+          const delays=[0,0.4,0.8,1.2,1.6,2.0,0.2,0.6,1.0,1.4,1.8,0.3,0.7,1.1,1.5,1.9];
+          const durs=[2.8,3.2,2.5,3.5,2.9,3.1,2.6,3.4,2.7,3.3,2.4,3.0,2.8,3.2,2.5,3.6];
+          angs.forEach((a,i)=>{
+            const s=document.createElement('div');
+            s.className='star';
+            s.style.cssText='--ang:'+a+'deg;--r:'+radii[i]+'px;--delay:'+delays[i]+'s;--dur:'+durs[i]+'s';
+            sf.appendChild(s);
+          });
+        }
+        // Ticker
+        const ticker=document.getElementById('ticker');
+        if (ticker) {
+          const films=['INCEPTION','THE GODFATHER','PARASITE','INTERSTELLAR','SPIRITED AWAY','PULP FICTION','OLDBOY','THE DARK KNIGHT','CIDADE DE DEUS','AMÉLIE','2001: A SPACE ODYSSEY','MULHOLLAND DRIVE','BLADE RUNNER','AKIRA','GOODFELLAS','PRINCESS MONONOKE','FARGO','HEAT','NOSFERATU','METROPOLIS'];
+          const doubled=[...films,...films];
+          doubled.forEach((f,i)=>{
+            ticker.innerHTML+='<span class="ticker-item">'+f+'</span>';
+            if(i<doubled.length-1) ticker.innerHTML+='<span class="ticker-item ticker-sep">&#9670;</span>';
+          });
+        }
+      })();
+    </script>
     """, unsafe_allow_html=True)
     st.stop()
 
