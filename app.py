@@ -468,153 +468,154 @@ if not user_input:
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap');
-    .cw-stage{background:#0A0A0A;min-height:460px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;position:relative;overflow:hidden;border-radius:16px;margin:1rem 0}
-    .cw-scanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent,transparent 3px,rgba(255,255,255,0.012) 3px,rgba(255,255,255,0.012) 4px);border-radius:16px}
+    .cw-stage{min-height:460px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;position:relative;overflow:hidden;background:transparent}
     .cw-reel-row{display:flex;align-items:center;gap:0;margin-bottom:2.4rem;overflow:hidden;width:100%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 60px,#000 calc(100% - 60px),transparent);mask-image:linear-gradient(90deg,transparent,#000 60px,#000 calc(100% - 60px),transparent)}
-    .cw-reel-track{display:flex;gap:0;animation:cwReelMove 6s linear infinite}
-    .cw-reel-hole{width:14px;height:20px;background:#0A0A0A;border:1px solid #1a1a1a;border-radius:2px;flex-shrink:0}
-    .cw-reel-cell{width:56px;height:36px;background:#0f0f0f;border:1px solid #161616;flex-shrink:0;position:relative;overflow:hidden}
-    .cw-reel-cell::after{content:'';position:absolute;inset:4px;background:#0a0a0a;border-radius:1px}
-    .cw-reel-cell.cw-lit{border-color:#1c1c1c}
-    .cw-reel-cell.cw-lit::after{background:linear-gradient(135deg,#181818,#0d0d0d)}
+    .cw-reel-track{display:flex;gap:0;animation:cwReelMove 5s linear infinite}
+    .cw-reel-hole{width:14px;height:22px;background:#1a1a1a;border:1px solid #333;border-radius:3px;flex-shrink:0}
+    .cw-reel-cell{width:56px;height:38px;background:#141414;border:1px solid #2a2a2a;flex-shrink:0;position:relative;overflow:hidden}
+    .cw-reel-cell::after{content:'';position:absolute;inset:5px;background:#0f0f0f;border-radius:1px}
+    .cw-reel-cell.cw-lit{border-color:#E50914}
+    .cw-reel-cell.cw-lit::after{background:#1a0000}
     @keyframes cwReelMove{0%{transform:translateX(0)}100%{transform:translateX(-71px)}}
-    .cw-beam-wrap{position:absolute;top:0;left:50%;width:320px;transform:translateX(-50%);height:240px;pointer-events:none;overflow:hidden}
-    .cw-beam{position:absolute;top:0;left:50%;width:0;height:0;border-left:100px solid transparent;border-right:100px solid transparent;border-top:240px solid rgba(229,9,20,0.028);transform:translateX(-50%);animation:cwBeamPulse 3.5s ease-in-out infinite}
-    @keyframes cwBeamPulse{0%,100%{opacity:0.5}50%{opacity:1}}
-    .cw-icon-stage{position:relative;width:84px;height:84px;margin-bottom:1.8rem;flex-shrink:0}
-    .cw-ring{position:absolute;inset:0;border-radius:50%;border:1px solid #1e1e1e;animation:cwRingSpin 12s linear infinite}
-    .cw-ring:nth-child(2){animation-duration:8s;animation-direction:reverse;inset:6px;border-color:#E50914;border-width:1px;border-style:dashed;opacity:0.3}
-    .cw-ring:nth-child(3){animation-duration:18s;inset:12px;border-color:#2a2a2a}
+    .cw-icon-stage{position:relative;width:100px;height:100px;margin-bottom:2rem;flex-shrink:0}
+    .cw-ring{position:absolute;inset:0;border-radius:50%;border:1px solid #333;animation:cwRingSpin 12s linear infinite}
+    .cw-ring.r2{animation-duration:7s;animation-direction:reverse;inset:8px;border-color:#E50914;border-width:1px;border-style:dashed;opacity:0.6}
+    .cw-ring.r3{animation-duration:20s;inset:16px;border-color:#444}
     @keyframes cwRingSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    .cw-icon-center{position:absolute;inset:18px;border-radius:50%;background:#0f0f0f;border:1px solid #1e1e1e;display:flex;align-items:center;justify-content:center}
-    .cw-play{width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:16px solid #E50914;margin-left:3px;animation:cwPlayPulse 2s ease-in-out infinite}
-    @keyframes cwPlayPulse{0%,100%{opacity:0.7}50%{opacity:1}}
-    .cw-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:8px;color:#1e1e1e;margin-bottom:0.3rem;animation:cwTitleBreathe 4s ease-in-out infinite}
-    @keyframes cwTitleBreathe{0%,100%{color:#1e1e1e;letter-spacing:8px}50%{color:#2d2d2d;letter-spacing:9px}}
-    .cw-sub{font-family:'Inter',sans-serif;font-size:0.72rem;letter-spacing:3px;color:#222;text-transform:uppercase;margin-bottom:2rem;animation:cwSubBreathe 4s ease-in-out infinite alternate}
+    .cw-icon-center{position:absolute;inset:22px;border-radius:50%;background:#141414;border:1px solid #333;display:flex;align-items:center;justify-content:center}
+    .cw-play{width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:18px solid #E50914;margin-left:3px;animation:cwPlayPulse 2s ease-in-out infinite}
+    @keyframes cwPlayPulse{0%,100%{opacity:0.8}50%{opacity:1}}
+    .cw-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:8px;color:#555;margin-bottom:0.35rem;animation:cwTitleBreathe 3.5s ease-in-out infinite}
+    @keyframes cwTitleBreathe{0%,100%{color:#444;letter-spacing:8px}50%{color:#777;letter-spacing:9px}}
+    .cw-sub{font-family:'Inter',sans-serif;font-size:0.74rem;letter-spacing:3px;color:#444;text-transform:uppercase;margin-bottom:2rem;animation:cwSubBreathe 3.5s ease-in-out infinite alternate}
     @keyframes cwSubBreathe{from{opacity:0.6}to{opacity:1}}
-    .cw-stat-row{display:flex;gap:1px;margin-bottom:2rem}
-    .cw-stat{background:#0f0f0f;border:1px solid #141414;border-radius:8px;padding:0.7rem 1.2rem;text-align:center;min-width:90px;opacity:0;animation:cwStatIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
-    .cw-stat:nth-child(1){animation-delay:0.1s;border-right:none;border-radius:8px 0 0 8px}
-    .cw-stat:nth-child(2){animation-delay:0.25s;border-radius:0}
-    .cw-stat:nth-child(3){animation-delay:0.4s;border-left:none;border-radius:0 8px 8px 0}
-    @keyframes cwStatIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-    .cw-num{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#E50914;letter-spacing:2px;line-height:1}
-    .cw-lbl{font-family:'Inter',sans-serif;font-size:0.58rem;color:#2d2d2d;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+    .cw-poster-strip{width:100%;overflow:hidden;margin-bottom:0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 80px,#000 calc(100% - 80px),transparent);mask-image:linear-gradient(90deg,transparent,#000 80px,#000 calc(100% - 80px),transparent)}
+    .cw-poster-track{display:flex;gap:10px;animation:cwPostersScroll 18s linear infinite}
+    .cw-poster-track.reverse{animation-direction:reverse;animation-duration:22s}
+    .cw-poster{width:72px;height:104px;flex-shrink:0;border-radius:6px;background:#141414;border:1px solid #2a2a2a;position:relative;overflow:hidden;opacity:0;animation:cwPosterIn 0.4s ease forwards}
+    .cw-poster.tall{width:64px;height:92px}
+    .cw-poster.accent{border-color:#E50914}
+    .cw-poster-shimmer{position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(229,9,20,0.06),transparent);animation:cwShimmer 2.5s ease-in-out infinite}
+    .cw-poster-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px}
+    .cw-poster-bar{width:100%;height:3px;border-radius:2px;background:#E50914;margin-bottom:4px;transform:scaleX(0);transform-origin:left;animation:cwBarReveal 0.5s ease forwards}
+    .cw-poster.accent .cw-poster-bar{background:rgba(255,255,255,0.12)}
+    .cw-poster-line{width:60%;height:2px;border-radius:1px;background:#2a2a2a}
+    .cw-poster-line2{width:40%;height:2px;border-radius:1px;background:#222;margin-top:3px}
+    @keyframes cwShimmer{0%{left:-60%}100%{left:120%}}
+    @keyframes cwBarReveal{to{transform:scaleX(1)}}
+    @keyframes cwPosterIn{to{opacity:1}}
+    @keyframes cwPostersScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
     .cw-ticker-shell{width:100%;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 50px,#000 calc(100% - 50px),transparent);mask-image:linear-gradient(90deg,transparent,#000 50px,#000 calc(100% - 50px),transparent)}
-    .cw-ticker-track{display:flex;white-space:nowrap;animation:cwTick 24s linear infinite}
-    .cw-t-item{font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:3px;color:#181818;padding:0 18px}
-    .cw-t-dot{color:#E50914;opacity:0.2;font-size:0.5rem;padding:0 2px}
+    .cw-ticker-track{display:flex;white-space:nowrap;animation:cwTick 22s linear infinite}
+    .cw-t-item{font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:3px;color:#333;padding:0 16px}
+    .cw-t-dot{color:#E50914;opacity:0.5;font-size:0.5rem;padding:0 2px}
     @keyframes cwTick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-    .cw-particle{position:absolute;width:3px;height:3px;border-radius:50%;background:#E50914;pointer-events:none;opacity:0}
-    @keyframes cwPFly{0%{opacity:0;transform:translate(0,0) scale(0)}15%{opacity:0.8}85%{opacity:0.3}100%{opacity:0;transform:translate(var(--cw-dx),var(--cw-dy)) scale(0.3)}}
+    .cw-particle{position:absolute;border-radius:50%;pointer-events:none;opacity:0;background:#E50914}
+    @keyframes cwPFly{0%{opacity:0;transform:translate(0,0) scale(0)}10%{opacity:1}80%{opacity:0.5}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0.4)}}
     </style>
 
     <div class="cw-stage" id="cwStage">
-      <div class="cw-scanlines"></div>
-      <div class="cw-beam-wrap"><div class="cw-beam"></div></div>
-
       <div class="cw-reel-row"><div class="cw-reel-track" id="cwReelTrack"></div></div>
 
       <div class="cw-icon-stage" id="cwIconStage">
         <div class="cw-ring"></div>
-        <div class="cw-ring"></div>
-        <div class="cw-ring"></div>
+        <div class="cw-ring r2"></div>
+        <div class="cw-ring r3"></div>
         <div class="cw-icon-center"><div class="cw-play"></div></div>
       </div>
 
       <div class="cw-title">ENTER YOUR USER ID</div>
       <div class="cw-sub">Your personalised movie wrap is waiting</div>
 
-      <div class="cw-stat-row">
-        <div class="cw-stat"><div class="cw-num" id="cwN1">0</div><div class="cw-lbl">Films Rated</div></div>
-        <div class="cw-stat"><div class="cw-num" id="cwN2">0</div><div class="cw-lbl">Genres Found</div></div>
-        <div class="cw-stat"><div class="cw-num" id="cwN3">0</div><div class="cw-lbl">Countries</div></div>
-      </div>
+      <div class="cw-poster-strip"><div class="cw-poster-track" id="cwPosterRow1"></div></div>
+      <div class="cw-poster-strip" style="margin-top:-1.2rem"><div class="cw-poster-track reverse" id="cwPosterRow2"></div></div>
 
-      <div class="cw-ticker-shell"><div class="cw-ticker-track" id="cwTicker"></div></div>
+      <div class="cw-ticker-shell" style="margin-top:1.2rem"><div class="cw-ticker-track" id="cwTicker"></div></div>
     </div>
 
     <script>
     (function(){
-      var reel = document.getElementById('cwReelTrack');
+      var reel=document.getElementById('cwReelTrack');
       if(reel){
         for(var i=0;i<24;i++){
-          var h=document.createElement('div'); h.className='cw-reel-hole'; reel.appendChild(h);
-          var c=document.createElement('div'); c.className='cw-reel-cell'+(i%3===1?' cw-lit':''); reel.appendChild(c);
+          var h=document.createElement('div');h.className='cw-reel-hole';reel.appendChild(h);
+          var c=document.createElement('div');c.className='cw-reel-cell'+(i%3===1?' cw-lit':'');reel.appendChild(c);
         }
-        var hx=document.createElement('div'); hx.className='cw-reel-hole'; reel.appendChild(hx);
+        var hx=document.createElement('div');hx.className='cw-reel-hole';reel.appendChild(hx);
       }
+
+      var heights=['','tall',''];
+      var accents=[false,false,true,false,false,false,true,false,false,false,true,false,false,false,false,true];
+
+      function makePosters(id,count){
+        var row=document.getElementById(id);
+        if(!row)return;
+        for(var i=0;i<count*2;i++){
+          var cls='cw-poster'+(heights[i%3]?' '+heights[i%3]:'')+(accents[i%accents.length]?' accent':'');
+          var delay=((i%count)*0.07).toFixed(2);
+          var barDelay=(parseFloat(delay)+0.15).toFixed(2);
+          var div=document.createElement('div');
+          div.className=cls;
+          div.style.animationDelay=delay+'s';
+          div.innerHTML='<div class="cw-poster-shimmer"></div><div class="cw-poster-inner"><div class="cw-poster-bar" style="animation-delay:'+barDelay+'s"></div><div class="cw-poster-line"></div><div class="cw-poster-line2"></div></div>';
+          row.appendChild(div);
+        }
+      }
+      makePosters('cwPosterRow1',14);
+      makePosters('cwPosterRow2',14);
 
       var ticker=document.getElementById('cwTicker');
       if(ticker){
         var films=['PARASITE','INCEPTION','SPIRITED AWAY','THE GODFATHER','OLDBOY','MULHOLLAND DRIVE','AMÉLIE','BLADE RUNNER 2049','2001: A SPACE ODYSSEY','GOODFELLAS','PRINCESS MONONOKE','THE DARK KNIGHT','CITY OF GOD','HEAT','FARGO','AKIRA','NOSFERATU','METROPOLIS','WILD STRAWBERRIES','BREATHLESS'];
         var doubled=films.concat(films);
         doubled.forEach(function(f,i){
-          var s=document.createElement('span'); s.className='cw-t-item'; s.textContent=f; ticker.appendChild(s);
-          if(i<doubled.length-1){var d=document.createElement('span');d.className='cw-t-dot';d.textContent='◆';ticker.appendChild(d);}
+          var s=document.createElement('span');s.className='cw-t-item';s.textContent=f;ticker.appendChild(s);
+          if(i<doubled.length-1){var d=document.createElement('span');d.className='cw-t-dot';d.textContent='&#9670;';ticker.appendChild(d);}
         });
       }
 
       var stage=document.getElementById('cwStage');
       var is=document.getElementById('cwIconStage');
-      if(stage && is){
-        var stageRect=stage.getBoundingClientRect();
-        var isRect=is.getBoundingClientRect();
-        var cx=isRect.left - stageRect.left + 42;
-        var cy=isRect.top  - stageRect.top  + 42;
-        function spawnParticle(){
-          var p=document.createElement('div'); p.className='cw-particle';
+      if(stage&&is){
+        function getCenter(){
+          var sr=stage.getBoundingClientRect();
+          var ir=is.getBoundingClientRect();
+          return{x:ir.left-sr.left+50,y:ir.top-sr.top+50};
+        }
+        setInterval(function(){
+          var c=getCenter();
+          var p=document.createElement('div');p.className='cw-particle';
           var angle=Math.random()*Math.PI*2;
-          var dist=55+Math.random()*90;
-          var dx=Math.cos(angle)*dist, dy=Math.sin(angle)*dist;
-          var dur=(1.8+Math.random()*1.4).toFixed(2);
-          p.style.cssText='left:'+(cx+Math.cos(angle)*8)+'px;top:'+(cy+Math.sin(angle)*8)+'px;--cw-dx:'+dx.toFixed(1)+'px;--cw-dy:'+dy.toFixed(1)+'px;animation:cwPFly '+dur+'s ease-out forwards';
+          var dist=70+Math.random()*100;
+          var dx=(Math.cos(angle)*dist).toFixed(1);
+          var dy=(Math.sin(angle)*dist).toFixed(1);
+          var sz=(2+Math.random()*3).toFixed(1);
+          var dur=(1.6+Math.random()*1.6).toFixed(2);
+          p.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(c.x+Math.cos(angle)*10).toFixed(1)+'px;top:'+(c.y+Math.sin(angle)*10).toFixed(1)+'px;--dx:'+dx+'px;--dy:'+dy+'px;animation:cwPFly '+dur+'s ease-out forwards';
           stage.appendChild(p);
           setTimeout(function(){if(p.parentNode)p.parentNode.removeChild(p);},parseFloat(dur)*1000+100);
-        }
-        setInterval(spawnParticle, 210);
+        },180);
 
         var dots=[];
-        for(var i=0;i<8;i++){
+        for(var i=0;i<10;i++){
           var dot=document.createElement('div');
           dot.style.cssText='width:4px;height:4px;border-radius:50%;background:#E50914;position:absolute;top:50%;left:50%;margin:-2px;pointer-events:none;';
           is.appendChild(dot);
-          dots.push({el:dot, offset:(i/8)*Math.PI*2});
+          dots.push({el:dot,offset:(i/10)*Math.PI*2});
         }
         var frame=0;
         function animDots(){
-          frame+=0.016;
+          frame+=0.018;
           for(var i=0;i<dots.length;i++){
             var a=dots[i].offset+frame;
-            var r=32;
-            var x=(Math.cos(a)*r).toFixed(2);
-            var y=(Math.sin(a)*r).toFixed(2);
-            dots[i].el.style.transform='translate(calc(-50% + '+x+'px), calc(-50% + '+y+'px))';
-            dots[i].el.style.opacity=(0.25+0.55*((Math.sin(a*2+i)*0.5)+0.5)).toFixed(2);
+            var x=(Math.cos(a)*40).toFixed(2),y=(Math.sin(a)*40).toFixed(2);
+            dots[i].el.style.transform='translate(calc(-50% + '+x+'px),calc(-50% + '+y+'px))';
+            dots[i].el.style.opacity=(0.3+0.7*((Math.sin(a*2+i)*0.5)+0.5)).toFixed(2);
           }
           requestAnimationFrame(animDots);
         }
         animDots();
       }
-
-      var statDefs=[
-        {id:'cwN1', lo:120,  hi:4200},
-        {id:'cwN2', lo:8,    hi:25},
-        {id:'cwN3', lo:6,    hi:40}
-      ];
-      statDefs.forEach(function(s){
-        var el=document.getElementById(s.id);
-        if(!el) return;
-        var target=s.lo+Math.floor(Math.random()*(s.hi-s.lo));
-        var v=s.lo;
-        var step=Math.max(1,Math.ceil((target-s.lo)/28));
-        var iv=setInterval(function(){
-          v=Math.min(v+step, target);
-          el.textContent=v.toLocaleString();
-          if(v>=target) clearInterval(iv);
-        },38);
-      });
     })();
     </script>
     """, unsafe_allow_html=True)
