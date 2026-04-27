@@ -1,48 +1,67 @@
-# 🎬 MovieWrap: Hybrid Movie Recommender
+# 🎬 CineWrap 2026: Hybrid Movie Recommender
 
-A portfolio-grade hybrid recommender system built with Python + Streamlit, inspired by "Netflix Wrapped".
+A portfolio-grade **hybrid recommendation system** built with Python and Streamlit, inspired by *Netflix Wrapped*, designed to deliver personalized movie recommendations through collaborative filtering, content similarity, and popularity signals.
+
+---
 
 ## Features
 
-- **Content-based filtering**: genre profile cosine similarity
-- **Collaborative filtering**: SVD-based user–user similarity
-- **Popularity blending**: ensures well-known movies aren't buried
-- **Recency weighting**: recent ratings matter more
-- **Streamlit UI**: interactive, sidebar controls, expandable recommendations
+- **Collaborative Filtering** — SVD-based user similarity recommendations  
+- **Content-Based Filtering** — Genre cosine similarity matching  
+- **Popularity Blending** — Balances personalization with highly rated titles  
+- **Recency Weighting** — Recent user preferences carry stronger influence  
+- **Interactive Streamlit App** — User controls and recommendation explorer  
 
-## Hybrid Scoring
+---
+
+## 🤖 Hybrid Scoring Model
+
+Recommendations are ranked using a weighted hybrid score:
 
 | Signal | Weight |
 |---|---|
-| Collaborative (SVD cosine) | 40% |
-| Content (genre cosine) | 35% |
-| Popularity (avg rating) | 25% |
+| Collaborative Filtering (SVD Cosine) | 50% |
+| Content Similarity (Genre Cosine) | 30% |
+| Popularity Signal (Average Rating) | 20% |
+
+### Final Score
+**Hybrid Score =**  
+`0.50 × Collaborative Score`  
+`+ 0.30 × Content Similarity`  
+`+ 0.20 × Popularity Score`
+
+### Why This Approach?
+- Prioritizes **personalization** through collaborative filtering  
+- Uses **content similarity** to support cold-start recommendations  
+- Adds **popularity** as a stabilizing quality signal  
+- Balances relevance, diversity, and discovery
+
+---
 
 ## Project Structure
 
-```
+```text
 movie-recommender/
-├── app.py                  # Streamlit app entry point
+├── app.py
 ├── requirements.txt
 ├── README.md
 ├── src/
-│   ├── __init__.py
-│   ├── data_loader.py      # CSV ingestion + datetime parsing
-│   ├── feature_engineering.py  # Recency weighting, genre profiles
-│   ├── collaborative.py    # SVD collaborative engine
-│   └── recommender.py      # Hybrid RecommenderSystem class
-└── models/                 # (optional) persisted model artefacts
+│   ├── data_loader.py
+│   ├── feature_engineering.py
+│   ├── collaborative.py
+│   └── recommender.py
+└── models/
 ```
+
+---
 
 ## Dataset Format
 
-Dataset contain:
-
 | Column | Description |
 |---|---|
-| `userId` | Integer user identifier |
-| `movieId` | Integer movie identifier |
-| `title` | Movie title string |
-| `rating` | Numeric rating (e.g. 0.5–5.0) |
-| `timestamp` | Unix timestamp (seconds) |
-| `Action`, `Drama`, … | One-hot genre columns |
+| `userId` | User identifier |
+| `movieId` | Movie identifier |
+| `title` | Movie title |
+| `rating` | User rating |
+| `timestamp` | Rating timestamp |
+| `Action`, `Drama`, ... | One-hot encoded genres |
