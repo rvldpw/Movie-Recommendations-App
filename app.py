@@ -242,11 +242,12 @@ p, li, span { color:#BBB !important; }
 }
 .dna-card-body {
     flex: 1;
-    padding: 28px 24px 20px;
+    padding: 22px 20px 16px;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
+    min-height: 0;
 }
 .dna-card-body::after {
     content: '';
@@ -280,25 +281,39 @@ p, li, span { color:#BBB !important; }
     margin-bottom: 20px;
 }
 .dna-nickname span { color: var(--red); }
-.dna-helix { flex: 1; }
-.dna-strand { display: flex; flex-direction: column; gap: 8px; }
-.dna-rung { display: flex; align-items: center; gap: 4px; animation: dnafloat 3s ease-in-out infinite; }
+.dna-helix { flex: 1; overflow: hidden; min-height: 0; }
+.dna-strand { display: flex; flex-direction: column; gap: 7px; height: 100%; justify-content: center; }
+.dna-rung {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    min-width: 0;
+    animation: dnafloat 3s ease-in-out infinite;
+}
 .dna-rung:nth-child(2) { animation-delay: .3s; }
 .dna-rung:nth-child(3) { animation-delay: .6s; }
 .dna-rung:nth-child(4) { animation-delay: .9s; }
 .dna-rung:nth-child(5) { animation-delay: 1.2s; }
 .dna-rung:nth-child(6) { animation-delay: 1.5s; }
-@keyframes dnafloat { 0%,100%{transform:translateX(0)} 50%{transform:translateX(3px)} }
-.dna-dot-l, .dna-dot-r { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.dna-bar { height: 3px; border-radius: 2px; flex: 1; }
+@keyframes dnafloat { 0%,100%{transform:translateX(0)} 50%{transform:translateX(2px)} }
+.dna-dot-l, .dna-dot-r { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dna-bar {
+    height: 3px;
+    border-radius: 2px;
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+}
 .dna-genre-label {
-    font-size: 8px;
+    font-size: 7px;
     font-family: 'Space Mono', monospace;
     color: #555;
     white-space: nowrap;
     flex-shrink: 0;
     font-weight: 700;
-    min-width: 50px;
+    width: 44px;
+    text-align: right;
 }
 .dna-divider {
     height: 1px;
@@ -1094,18 +1109,17 @@ genre_colors_list = _GENRE_COLORS[:len(genres)]
 helix_rungs = ""
 for i, (genre_name, genre_score) in enumerate(genres):
     color   = genre_colors_list[i] if i < len(genre_colors_list) else "#888"
-    offset  = "12px" if i % 2 != 0 else "0px"
-    bar_w   = max(15, int(genre_score * 80))
+    bar_w   = max(20, int(genre_score * 75))
     label   = genre_name.upper()[:7]
     helix_rungs += (
-        f'<div class="dna-rung" style="padding-left:{offset}">'
+        f'<div class="dna-rung">'
         f'<div class="dna-dot-l" style="background:{color};opacity:.9"></div>'
-        f'<div class="dna-bar" style="background:{color};max-width:{bar_w}%"></div>'
+        f'<div class="dna-bar" style="background:{color};opacity:0.85;flex:{bar_w}"></div>'
+        f'<div class="dna-bar" style="background:transparent;flex:{100 - bar_w}"></div>'
         f'<div class="dna-genre-label">{label}</div>'
         f'<div class="dna-dot-r" style="background:{color};opacity:.3"></div>'
         f'</div>'
     )
-
 # ── Build slides data ──────────────────────────────────────────────────────────
 slides_html = ""
 total_slides = len(recent) if not recent.empty else 0
@@ -1144,7 +1158,7 @@ for i, (_, row) in enumerate(recent.iterrows()):
 dots_html = ""
 for i in range(total_slides):
     active_cls = " active" if i == 0 else ""
-    dots_html += f'<div class="slide-dot{active_cls}" onclick="cwSlide({i})" title="Slide {i+1}"></div>'
+    dots_html += f'<div class="slide-dot{active_cls}" title="Slide {i+1}"></div>'
 
 # ── Share card content ─────────────────────────────────────────────────────────
 sc_dna_segs = ""
@@ -1188,9 +1202,9 @@ if total_slides <= 1:
 else:
     controls_html = (
         '<div class="slideshow-controls">'
-        '<button class="slide-btn" onclick="cwSlide(cwCurSlide-1)" title="Previous">&#8592;</button>'
+        '<button class="slide-btn" title="Previous">&#8592;</button>'
         f'<div class="slide-dots" id="cwDots">{dots_html}</div>'
-        '<button class="slide-btn" onclick="cwSlide(cwCurSlide+1)" title="Next">&#8594;</button>'
+        '<button class="slide-btn" title="Next">&#8594;</button>'
         '</div>'
     )
 
@@ -1274,15 +1288,18 @@ st.markdown(f"""
     <div class="sc-tag">cinewrap.app #MYWRAP2026</div>
   </div>
 </div>
-<button class="share-btn" id="cwShareBtn" onclick="cwDownloadPNG()">&#8681; DOWNLOAD YOUR WRAP AS PNG</button>
+<button class="share-btn" id="cwShareBtn">&#8681; DOWNLOAD YOUR WRAP AS PNG</button>
 
 <script>
 (function(){{
-  /* ── Slideshow ── */
+  /* ── Wait for DOM then wire everything up ── */
+  function cwInit() {{
+
   var cwCurSlide = 0;
   var cwTotal = {total_slides};
 
-  window.cwSlide = function(idx) {{
+  /* ── Slideshow nav ── */
+  function cwSlide(idx) {{
     if (cwTotal <= 1) return;
     var slides = document.querySelectorAll('#cwSlideshowBody .slide');
     var dots   = document.querySelectorAll('#cwDots .slide-dot');
@@ -1295,51 +1312,28 @@ st.markdown(f"""
     }});
     var counter = document.getElementById('cwSlideCounter');
     if (counter) counter.textContent = (cwCurSlide + 1) + ' / ' + cwTotal;
-  }};
+  }}
 
+  /* Wire arrow buttons via event listeners (not onclick attr) */
+  var btnPrev = document.querySelector('.slide-btn[title="Previous"]');
+  var btnNext = document.querySelector('.slide-btn[title="Next"]');
+  if (btnPrev) btnPrev.addEventListener('click', function() {{ cwSlide(cwCurSlide - 1); }});
+  if (btnNext) btnNext.addEventListener('click', function() {{ cwSlide(cwCurSlide + 1); }});
+
+  /* Wire dot clicks */
+  document.querySelectorAll('.slide-dot').forEach(function(dot, i) {{
+    dot.addEventListener('click', function() {{ cwSlide(i); }});
+  }});
+
+  /* Auto-advance */
   if (cwTotal > 1) {{
-    setInterval(function() {{ window.cwSlide(cwCurSlide + 1); }}, 4000);
+    setInterval(function() {{ cwSlide(cwCurSlide + 1); }}, 4000);
   }}
 
-  /* ── Share (copy link to clipboard) ── */
-  window.cwShare = function() {{
-    var btn = document.getElementById('cwShareBtn') || document.querySelector('.share-btn');
-    var text = 'cinewrap.app/u/{username} — The {dna_adj} {dna_noun} #MYWRAP2026';
-    if (navigator.clipboard && navigator.clipboard.writeText) {{
-      navigator.clipboard.writeText(text).then(function() {{
-        btn.textContent = '✓ LINK COPIED!';
-        btn.style.background = '#1a6b1a';
-        setTimeout(function() {{
-          btn.textContent = '↑ SHARE YOUR WRAP';
-          btn.style.background = '';
-        }}, 2400);
-      }}).catch(function() {{
-        cwFallbackCopy(text, btn);
-      }});
-    }} else {{
-      cwFallbackCopy(text, btn);
-    }}
-  }};
-
-  function cwFallbackCopy(text, btn) {{
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
-    document.body.appendChild(ta);
-    ta.focus(); ta.select();
-    try {{ document.execCommand('copy'); }} catch(e) {{}}
-    document.body.removeChild(ta);
-    btn.textContent = '✓ LINK COPIED!';
-    btn.style.background = '#1a6b1a';
-    setTimeout(function() {{
-      btn.textContent = '↑ SHARE YOUR WRAP';
-      btn.style.background = '';
-    }}, 2400);
-  }}
-
-  /* ── Download PNG — pure canvas draw (no CDN needed) ── */
-  window.cwDownloadPNG = function() {{
-    var btn = document.querySelector('.share-btn');
+  /* ── Download PNG — pure canvas draw ── */
+  function cwDownloadPNG() {{
+    var btn = document.getElementById('cwShareBtn');
+    if (!btn) return;
     btn.textContent = '⏳ DRAWING…';
     btn.disabled = true;
 
@@ -1473,7 +1467,20 @@ st.markdown(f"""
         btn.disabled = false;
       }}, 2200);
     }}, 60);
-  }};
+  }} /* end cwDownloadPNG */
+
+  /* Wire download button */
+  var shareBtn = document.getElementById('cwShareBtn');
+  if (shareBtn) shareBtn.addEventListener('click', cwDownloadPNG);
+
+  }}}} /* end cwInit */
+
+  /* Run after DOM is painted */
+  if (document.readyState === 'loading') {{
+    document.addEventListener('DOMContentLoaded', cwInit);
+  }} else {{
+    setTimeout(cwInit, 0);
+  }}
 }})();
 </script>
 """, unsafe_allow_html=True)
