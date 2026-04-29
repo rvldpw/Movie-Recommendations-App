@@ -212,170 +212,319 @@ p, li, span { color:#BBB !important; }
     text-transform: uppercase;
 }
 
-/* ── DNA + Recent row — same grid as .movie-grid ── */
+/* ══════════════════════════════════════════════════════
+   UNIVERSE ROW — 50/50 split: DNA card | Slideshow
+   ══════════════════════════════════════════════════════ */
 .universe-row {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-    align-items: start;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+    align-items: stretch;
 }
 
-/* DNA card lives in column 1, matches poster-card dimensions exactly */
+/* DNA CARD */
 .dna-card {
     background: #0f0000;
     border: 1px solid #2a0808;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    min-height: 520px;
     position: relative;
     transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
 }
 .dna-card:hover {
     border-color: var(--red);
     transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(229,9,20,0.2);
+    box-shadow: 0 20px 50px rgba(229,9,20,0.25);
 }
-/* DNA card image area — same aspect-ratio as poster-img-wrap (2/3) */
-.dna-card .dna-img-wrap {
-    width: 100%;
-    aspect-ratio: 2/3;
-    background: linear-gradient(180deg, #1a0000 0%, #0a0000 100%);
+.dna-card-body {
+    flex: 1;
+    padding: 28px 24px 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
     position: relative;
     overflow: hidden;
 }
-.dna-card .dna-img-wrap::after {
+.dna-card-body::after {
     content: '';
     position: absolute;
-    top: -20px; right: -20px;
-    width: 100px; height: 100px;
-    background: radial-gradient(circle, rgba(229,9,20,0.22) 0%, transparent 70%);
+    top: -30px; right: -30px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(229,9,20,0.18) 0%, transparent 70%);
     pointer-events: none;
 }
 .dna-logo {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 9px;
-    letter-spacing: 2.5px;
+    font-size: 11px;
+    letter-spacing: 3px;
     color: var(--red);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 .dna-nickname-label {
-    font-size: 8px;
-    letter-spacing: 1.5px;
+    font-size: 9px;
+    letter-spacing: 2px;
     color: #444;
     text-transform: uppercase;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    font-family: 'Space Mono', monospace;
 }
 .dna-nickname {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 17px;
-    letter-spacing: 1.5px;
+    font-size: 2.6rem;
+    letter-spacing: 2px;
     color: var(--white);
     line-height: 1.05;
-    margin-bottom: 8px;
+    margin-bottom: 20px;
 }
 .dna-nickname span { color: var(--red); }
 .dna-helix { flex: 1; }
-.dna-strand { display: flex; flex-direction: column; gap: 5px; }
-.dna-rung { display: flex; align-items: center; gap: 3px; animation: dnafloat 3s ease-in-out infinite; }
+.dna-strand { display: flex; flex-direction: column; gap: 8px; }
+.dna-rung { display: flex; align-items: center; gap: 4px; animation: dnafloat 3s ease-in-out infinite; }
 .dna-rung:nth-child(2) { animation-delay: .3s; }
 .dna-rung:nth-child(3) { animation-delay: .6s; }
 .dna-rung:nth-child(4) { animation-delay: .9s; }
 .dna-rung:nth-child(5) { animation-delay: 1.2s; }
 .dna-rung:nth-child(6) { animation-delay: 1.5s; }
-@keyframes dnafloat { 0%,100%{transform:translateX(0)} 50%{transform:translateX(2px)} }
-.dna-dot-l, .dna-dot-r { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-.dna-bar { height: 2px; border-radius: 2px; flex: 1; }
+@keyframes dnafloat { 0%,100%{transform:translateX(0)} 50%{transform:translateX(3px)} }
+.dna-dot-l, .dna-dot-r { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dna-bar { height: 3px; border-radius: 2px; flex: 1; }
 .dna-genre-label {
-    font-size: 7px;
+    font-size: 8px;
     font-family: 'Space Mono', monospace;
     color: #555;
     white-space: nowrap;
     flex-shrink: 0;
     font-weight: 700;
+    min-width: 50px;
 }
-.dna-bottom {
-    margin-top: 6px;
-    padding-top: 6px;
-    border-top: 1px solid #1a0808;
+.dna-divider {
+    height: 1px;
+    background: linear-gradient(90deg, #2a0808, transparent);
+    margin: 16px 0;
 }
-.dna-stats-row { display: flex; align-items: flex-end; justify-content: space-between; }
+.dna-stats-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
 .dna-rarity-score {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
+    font-size: 3rem;
     color: var(--gold);
     line-height: 1;
 }
 .dna-rarity-sub {
-    font-size: 7px;
-    color: #333;
-    letter-spacing: 1px;
+    font-size: 8px;
+    color: #444;
+    letter-spacing: 2px;
     text-transform: uppercase;
     font-family: 'Space Mono', monospace;
-    margin-top: 1px;
+    margin-top: 2px;
 }
 .dna-rarity-right { text-align: right; }
 .dna-rarity-right-top {
-    font-size: 9px;
-    color: #555;
+    font-size: 1.4rem;
+    color: #777;
     font-family: 'Bebas Neue', sans-serif;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
 }
 .dna-rarity-right-bot {
-    font-size: 7px;
-    color: #333;
-    letter-spacing: 0.5px;
+    font-size: 8px;
+    color: #444;
+    letter-spacing: 1px;
     font-family: 'Space Mono', monospace;
+}
+.dna-card-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #1a0808;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 .dna-share-badge {
     position: absolute;
-    top: 6px; right: 6px;
+    top: 14px; right: 14px;
     background: rgba(229,9,20,0.15);
     border: 1px solid rgba(229,9,20,0.3);
     border-radius: 20px;
-    padding: 1px 5px;
-    font-size: 7px;
+    padding: 2px 8px;
+    font-size: 8px;
     color: var(--red);
     letter-spacing: 1px;
     font-family: 'Space Mono', monospace;
     font-weight: 700;
 }
 
-/* ── Recent movies — individual poster cards (same as poster-card) ── */
-.recent-poster-card {
+/* SLIDESHOW */
+.slideshow-panel {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+    min-height: 520px;
+    position: relative;
 }
-.recent-poster-card:hover {
-    border-color: var(--red);
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(229,9,20,0.2);
+.slideshow-panel:hover {
+    border-color: #3a3a3a;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
-.recent-poster-card .poster-img-wrap {
-    width: 100%;
-    aspect-ratio: 2/3;
-    overflow: hidden;
-    background: #1a1a1a;
+.slideshow-header {
+    padding: 16px 20px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
     flex-shrink: 0;
 }
-.recent-poster-card .poster-img-wrap img {
+.slideshow-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: #555;
+}
+.slideshow-counter {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #444;
+}
+.slideshow-body {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+.slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+.slide.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.slide-poster {
+    width: 42%;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.slide-poster img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+}
+.slide-info {
+    flex: 1;
+    padding: 24px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+}
+.slide-title {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--white);
+    line-height: 1.3;
+}
+.slide-rating { color: var(--gold); font-size: 1rem; }
+.slide-date { color: var(--muted); font-size: 0.78rem; }
+.slide-your-rating {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    color: var(--red);
+    letter-spacing: 1px;
+    line-height: 1;
+    margin-top: auto;
+}
+.slide-your-rating-label {
+    font-size: 0.7rem;
+    color: #555;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+.slide-imdb-badge {
+    display: inline-block;
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    width: fit-content;
+}
+.slideshow-controls {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.slide-btn {
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #888;
+    font-size: 1rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    font-family: monospace;
+    flex-shrink: 0;
+}
+.slide-btn:hover { background: #222; border-color: var(--red); color: var(--red); }
+.slide-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.slide-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    transition: background 0.25s, transform 0.25s;
+    cursor: pointer;
+}
+.slide-dot.active { background: var(--red); transform: scale(1.4); }
+
+/* Single-movie fallback (when only 1 recent movie) */
+.single-recent-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 520px;
+}
+.single-recent-card .poster-img-wrap {
+    width: 100%;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: #1a1a1a;
+    flex-shrink: 0;
+}
+.single-recent-card .poster-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* ── Shareable card ── */
@@ -454,13 +603,14 @@ p, li, span { color:#BBB !important; }
 .sc-username { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 2px; color: #555; }
 .sc-tag { font-size: 9px; color: #333; font-family: 'Space Mono', monospace; }
 .share-btn {
-    width: 100%;
+    display: inline-block;
     margin-top: 10px;
+    margin-right: 8px;
     background: var(--red);
     color: white;
     border: none;
     border-radius: 8px;
-    padding: 10px;
+    padding: 10px 22px;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 14px;
     letter-spacing: 2px;
@@ -469,6 +619,21 @@ p, li, span { color:#BBB !important; }
 }
 .share-btn:hover  { background: var(--red2); }
 .share-btn:active { transform: scale(0.98); }
+.download-btn {
+    display: inline-block;
+    margin-top: 10px;
+    background: #1a1a1a;
+    color: #CCC;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.download-btn:hover { background: #222; border-color: var(--red); color: var(--red); }
 
 .section-label {
     font-family: 'Bebas Neue', sans-serif !important;
@@ -642,21 +807,18 @@ _DNA_NOUN = [
     "Chronicler", "Wanderer", "Sentinel", "Dreamer", "Observer"
 ]
 
-# Genre colour palette for DNA helix + share card
 _GENRE_COLORS = [
     "#E50914", "#F5C518", "#4CAF50", "#2196F3",
     "#FF5722", "#E91E63", "#9C27B0", "#00BCD4",
 ]
 
 def get_dna_nickname(genres: list, user_id: int) -> tuple:
-    """Returns (adj, noun) deterministically from top genre + user_id."""
     top_genre = genres[0][0] if genres else "Drama"
     adjs = _DNA_ADJ.get(top_genre, ["Cosmic", "Liminal", "Wandering"])
     rng  = random.Random(int(user_id) * 13)
     return rng.choice(adjs), rng.choice(_DNA_NOUN)
 
 def rarity_score(genres: list, user_id: int) -> int:
-    """Pseudo-rarity based on genre diversity + top-genre obscurity."""
     if not genres:
         return 100
     scores    = [s for _, s in genres]
@@ -668,30 +830,6 @@ def rarity_score(genres: list, user_id: int) -> int:
 # ── Card helpers ───────────────────────────────────────────────────────────────
 def _card_wrap(inner: str) -> str:
     return '<div class="poster-card">' + inner + '</div>'
-
-def recent_card(row, show_posters: bool) -> str:
-    img, imdb = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
-    country   = get_movie_country(row["title"])
-    flag      = country_flag(country)
-    rating    = int(round(row["rating"]))
-    stars     = "&#9733;" * rating + "&#9734;" * (5 - rating)
-    country_html = (
-        '<div class="country-tag">' + flag + " " + country + "</div>"
-        if country else ""
-    )
-    inner = (
-        '<div class="poster-img-wrap">'
-        '<img src="' + img + '" alt="" onerror="this.src=&quot;' + PLACEHOLDER + '&quot;"/>'
-        '</div>'
-        '<div class="poster-info">'
-        '<div class="poster-title">' + row["title"] + "</div>"
-        '<div class="poster-rating">' + stars + " &nbsp; IMDB " + imdb + "</div>"
-        '<div class="poster-date">&#128197; ' + str(row["datetime"].date()) + "</div>"
-        + country_html
-        + '<div class="poster-user-rating">Your rating: ' + str(row["rating"]) + "/5</div>"
-        "</div>"
-    )
-    return _card_wrap(inner)
 
 def rec_card(row, rank: int, show_posters: bool) -> str:
     img, imdb = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
@@ -936,7 +1074,7 @@ if country_profile:
             )
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 🧬 DNA CARD + 📽️ RECENT SLIDESHOW  (side by side)
+# 🧬 DNA CARD + 📽️ RECENT SLIDESHOW  (50/50 side by side)
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("## 🧬 YOUR CINEWRAP UNIVERSE")
 
@@ -944,29 +1082,28 @@ st.markdown("## 🧬 YOUR CINEWRAP UNIVERSE")
 dna_adj, dna_noun = get_dna_nickname(genres, user_id)
 score             = rarity_score(genres, user_id)
 pct_top           = max(1, min(99, round((1 - score / 500) * 100)))
-
-# Build genre colours list
 genre_colors_list = _GENRE_COLORS[:len(genres)]
 
-# Build helix HTML
+# ── DNA helix rungs ────────────────────────────────────────────────────────────
 helix_rungs = ""
 for i, (genre_name, genre_score) in enumerate(genres):
     color   = genre_colors_list[i] if i < len(genre_colors_list) else "#888"
-    offset  = "10px" if i % 2 != 0 else "0px"
-    bar_w   = max(15, int(genre_score * 75))
+    offset  = "12px" if i % 2 != 0 else "0px"
+    bar_w   = max(15, int(genre_score * 80))
     label   = genre_name.upper()[:7]
     helix_rungs += (
         f'<div class="dna-rung" style="padding-left:{offset}">'
-        f'<div class="dna-dot-l" style="background:{color};opacity:.8"></div>'
+        f'<div class="dna-dot-l" style="background:{color};opacity:.9"></div>'
         f'<div class="dna-bar" style="background:{color};max-width:{bar_w}%"></div>'
         f'<div class="dna-genre-label">{label}</div>'
-        f'<div class="dna-dot-r" style="background:{color};opacity:.35"></div>'
+        f'<div class="dna-dot-r" style="background:{color};opacity:.3"></div>'
         f'</div>'
     )
 
-# Build slideshow slides HTML — now individual poster cards
-recent_cards_html = ""
+# ── Build slides data ──────────────────────────────────────────────────────────
+slides_html = ""
 total_slides = len(recent) if not recent.empty else 0
+use_slideshow = total_slides > 1   # slideshow for 2+ movies
 
 for i, (_, row) in enumerate(recent.iterrows()):
     poster_url, imdb_r = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
@@ -975,25 +1112,35 @@ for i, (_, row) in enumerate(recent.iterrows()):
     country     = get_movie_country(row["title"])
     flag        = country_flag(country)
     country_html = (
-        f'<div class="country-tag">{flag} {country}</div>'
+        f'<div class="country-tag" style="margin-top:6px">{flag} {country}</div>'
         if country else ""
     )
-    recent_cards_html += (
-        f'<div class="recent-poster-card">'
-        f'  <div class="poster-img-wrap">'
-        f'    <img src="{poster_url}" alt="" onerror="this.src=&quot;{PLACEHOLDER}&quot;"/>'
+    active_cls = " active" if i == 0 else ""
+    slides_html += (
+        f'<div class="slide{active_cls}" data-idx="{i}">'
+        f'  <div class="slide-poster">'
+        f'    <img src="{poster_url}" alt="" onerror="this.src=\'{PLACEHOLDER}\'"/>'
         f'  </div>'
-        f'  <div class="poster-info">'
-        f'    <div class="poster-title">{row["title"]}</div>'
-        f'    <div class="poster-rating">{stars} &nbsp; IMDB {imdb_r}</div>'
-        f'    <div class="poster-date">&#128197; {str(row["datetime"].date())}</div>'
+        f'  <div class="slide-info">'
+        f'    <div class="slide-title">{row["title"]}</div>'
+        f'    <div class="slide-rating">{stars}</div>'
+        f'    <div class="slide-imdb-badge">IMDb {imdb_r}</div>'
+        f'    <div class="slide-date">📅 {str(row["datetime"].date())}</div>'
         f'    {country_html}'
-        f'    <div class="poster-user-rating">Your rating: {row["rating"]}/5</div>'
+        f'    <div style="flex:1"></div>'
+        f'    <div class="slide-your-rating-label">YOUR RATING</div>'
+        f'    <div class="slide-your-rating">{row["rating"]}<span style="font-size:1.2rem;color:#444">/5</span></div>'
         f'  </div>'
         f'</div>'
     )
 
-# Build share card DNA bar + pills
+# Dots for navigation
+dots_html = ""
+for i in range(total_slides):
+    active_cls = " active" if i == 0 else ""
+    dots_html += f'<div class="slide-dot{active_cls}" onclick="cwSlide({i})" title="Slide {i+1}"></div>'
+
+# ── Share card content ─────────────────────────────────────────────────────────
 sc_dna_segs = ""
 sc_pills    = ""
 pill_colors = [
@@ -1022,49 +1169,61 @@ films_count    = len(full_history)
 avg_rating_val = round(full_history["rating"].mean(), 1) if not full_history.empty else 0.0
 top_genres_str = " · ".join(g for g, _ in genres[:3]) if genres else ""
 
-# ── Render the universe row ────────────────────────────────────────────────────
+# ── Render ─────────────────────────────────────────────────────────────────────
 st.markdown(f"""
 <div class="universe-row">
 
-  <!-- COL 1: DNA CARD -->
+  <!-- LEFT: DNA CARD -->
   <div class="dna-card">
-    <div class="dna-img-wrap">
+    <div class="dna-card-body">
       <div class="dna-share-badge">DNA</div>
-      <div style="padding:12px 10px;display:flex;flex-direction:column;width:100%;flex:1">
-        <div class="dna-logo">◈ CINEWRAP DNA</div>
-        <div class="dna-nickname-label">Your archetype</div>
-        <div class="dna-nickname">THE <span>{dna_adj.upper()}</span><br>{dna_noun.upper()}</div>
-        <div class="dna-helix" style="flex:1">
-          <div class="dna-strand">{helix_rungs}</div>
+      <div class="dna-logo">◈ CINEWRAP DNA</div>
+      <div class="dna-nickname-label">Your archetype</div>
+      <div class="dna-nickname">THE <span>{dna_adj.upper()}</span><br>{dna_noun.upper()}</div>
+      <div class="dna-helix">
+        <div class="dna-strand">{helix_rungs}</div>
+      </div>
+      <div class="dna-divider"></div>
+      <div class="dna-stats-row">
+        <div>
+          <div class="dna-rarity-score">{score}</div>
+          <div class="dna-rarity-sub">RARITY SCORE</div>
         </div>
-        <div class="dna-bottom">
-          <div class="dna-stats-row">
-            <div>
-              <div class="dna-rarity-score">{score}</div>
-              <div class="dna-rarity-sub">RARITY</div>
-            </div>
-            <div class="dna-rarity-right">
-              <div class="dna-rarity-right-top">TOP {pct_top}%</div>
-              <div class="dna-rarity-right-bot">CINEPHILES</div>
-            </div>
-          </div>
+        <div class="dna-rarity-right">
+          <div class="dna-rarity-right-top">TOP {pct_top}%</div>
+          <div class="dna-rarity-right-bot">CINEPHILES</div>
         </div>
       </div>
     </div>
-    <div class="poster-info">
-      <div class="poster-title" style="color:var(--red);font-family:'Bebas Neue',sans-serif;font-size:0.75rem;letter-spacing:1.5px">YOUR TASTE DNA</div>
+    <div class="dna-card-footer">
+      <div class="poster-title" style="color:var(--red);font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:2px">YOUR TASTE DNA</div>
       <div class="poster-date">{top_genres_str}</div>
     </div>
   </div>
 
-  <!-- COLS 2–5: RECENT POSTER CARDS -->
-  {recent_cards_html}
+  <!-- RIGHT: SLIDESHOW -->
+  <div class="slideshow-panel" id="cwSlideshowPanel">
+    <div class="slideshow-header">
+      <div class="slideshow-label">◈ RECENTLY WATCHED</div>
+      <div class="slideshow-counter" id="cwSlideCounter">1 / {total_slides}</div>
+    </div>
+    <div class="slideshow-body" id="cwSlideshowBody">
+      {slides_html}
+    </div>
+    {"" if total_slides <= 1 else f'''
+    <div class="slideshow-controls">
+      <button class="slide-btn" onclick="cwSlide(cwCurSlide-1)" title="Previous">&#8592;</button>
+      <div class="slide-dots" id="cwDots">{dots_html}</div>
+      <button class="slide-btn" onclick="cwSlide(cwCurSlide+1)" title="Next">&#8594;</button>
+    </div>
+    '''}
+  </div>
 
 </div>
 
 <!-- SHARE CARD -->
 <p class="section-label">◈ SHARE YOUR WRAP</p>
-<div class="sc-canvas">
+<div class="sc-canvas" id="cwShareCard">
   <div class="sc-header">
     <div class="sc-brand">CINEWRAP 2026</div>
     <div class="sc-year">FILM YEAR</div>
@@ -1096,10 +1255,39 @@ st.markdown(f"""
     <div class="sc-tag">cinewrap.app #MYWRAP2026</div>
   </div>
 </div>
-<button class="share-btn" onclick="cwShare()">&#8593; SHARE YOUR WRAP</button>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:2px">
+  <button class="share-btn" onclick="cwShare()">&#8593; SHARE YOUR WRAP</button>
+  <button class="download-btn" onclick="cwDownloadPNG()">&#8681; DOWNLOAD AS PNG</button>
+</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 (function(){{
+  /* ── Slideshow ── */
+  var cwCurSlide = 0;
+  var cwTotal = {total_slides};
+
+  window.cwSlide = function(idx) {{
+    if (cwTotal <= 1) return;
+    var slides = document.querySelectorAll('#cwSlideshowBody .slide');
+    var dots   = document.querySelectorAll('#cwDots .slide-dot');
+    cwCurSlide = ((idx % cwTotal) + cwTotal) % cwTotal;
+    slides.forEach(function(s, i) {{
+      s.classList.toggle('active', i === cwCurSlide);
+    }});
+    if (dots.length) dots.forEach(function(d, i) {{
+      d.classList.toggle('active', i === cwCurSlide);
+    }});
+    var counter = document.getElementById('cwSlideCounter');
+    if (counter) counter.textContent = (cwCurSlide + 1) + ' / ' + cwTotal;
+  }};
+
+  /* ── Auto-advance every 4 s ── */
+  if (cwTotal > 1) {{
+    setInterval(function() {{ window.cwSlide(cwCurSlide + 1); }}, 4000);
+  }}
+
+  /* ── Share ── */
   window.cwShare = function() {{
     var btn = document.querySelector('.share-btn');
     btn.textContent = '✓ COPIED — PASTE TO STORIES!';
@@ -1113,6 +1301,43 @@ st.markdown(f"""
         'cinewrap.app/u/{username} — The {dna_adj} {dna_noun} #MYWRAP2026'
       ).catch(function(){{}});
     }}
+  }};
+
+  /* ── Download PNG ── */
+  window.cwDownloadPNG = function() {{
+    var btn = document.querySelector('.download-btn');
+    var card = document.getElementById('cwShareCard');
+    if (!card || typeof html2canvas === 'undefined') {{
+      alert('html2canvas not loaded yet, please try again.');
+      return;
+    }}
+    btn.textContent = '⏳ RENDERING…';
+    btn.disabled = true;
+    html2canvas(card, {{
+      backgroundColor: '#0f0000',
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+    }}).then(function(canvas) {{
+      var link = document.createElement('a');
+      link.download = 'cinewrap-{username}-2026.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      btn.textContent = '✓ SAVED!';
+      btn.style.borderColor = '#4CAF50';
+      btn.style.color = '#4CAF50';
+      setTimeout(function() {{
+        btn.textContent = '↓ DOWNLOAD AS PNG';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+        btn.disabled = false;
+      }}, 2200);
+    }}).catch(function(err) {{
+      btn.textContent = '↓ DOWNLOAD AS PNG';
+      btn.disabled = false;
+      console.error('html2canvas error', err);
+    }});
   }};
 }})();
 </script>
