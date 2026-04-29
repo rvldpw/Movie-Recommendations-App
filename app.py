@@ -220,7 +220,7 @@ p, li, span { color:#BBB !important; }
     grid-template-columns: 1fr 1fr;
     gap: 24px;
     margin-bottom: 28px;
-    align-items: stretch;
+    align-items: start;
 }
 
 /* DNA CARD */
@@ -231,7 +231,7 @@ p, li, span { color:#BBB !important; }
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 560px;
+    min-height: 500px;
     position: relative;
     transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
 }
@@ -366,7 +366,7 @@ p, li, span { color:#BBB !important; }
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 560px;
+    min-height: 500px;
     position: relative;
 }
 .slideshow-panel:hover {
@@ -396,27 +396,25 @@ p, li, span { color:#BBB !important; }
     flex: 1;
     position: relative;
     overflow: hidden;
-    min-height: 420px;
-    height: 420px;
 }
 .slide {
     position: absolute;
-    inset: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     display: flex;
+    flex-direction: row;
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
-    height: 100%;
 }
 .slide.active {
     opacity: 1;
     pointer-events: auto;
 }
 .slide-poster {
-    width: 38%;
+    width: 45%;
     flex-shrink: 0;
     overflow: hidden;
-    height: 100%;
+    background: #111;
 }
 .slide-poster img {
     width: 100%;
@@ -427,11 +425,12 @@ p, li, span { color:#BBB !important; }
 }
 .slide-info {
     flex: 1;
-    padding: 28px 24px;
+    padding: 24px 20px 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     overflow: hidden;
+    min-width: 0;
 }
 .slide-title {
     font-family: 'DM Sans', sans-serif;
@@ -608,22 +607,24 @@ p, li, span { color:#BBB !important; }
 .sc-username { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 2px; color: #555; }
 .sc-tag { font-size: 9px; color: #333; font-family: 'Space Mono', monospace; }
 .share-btn {
-    display: inline-block;
-    margin-top: 10px;
-    margin-right: 8px;
+    display: block;
+    width: 100%;
+    margin-top: 12px;
     background: var(--red);
     color: white;
     border: none;
-    border-radius: 8px;
-    padding: 10px 22px;
+    border-radius: 10px;
+    padding: 13px 22px;
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px;
-    letter-spacing: 2px;
+    font-size: 15px;
+    letter-spacing: 3px;
     cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(229,9,20,0.25);
 }
-.share-btn:hover  { background: var(--red2); }
+.share-btn:hover  { background: var(--red2); box-shadow: 0 6px 28px rgba(229,9,20,0.4); }
 .share-btn:active { transform: scale(0.98); }
+.share-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .download-btn {
     display: inline-block;
     margin-top: 10px;
@@ -1181,6 +1182,18 @@ sc_dna_bar_data = ", ".join(
 )
 genre_pill_names = ", ".join(f'"{g[0].upper()}"' for g in genres)
 
+# ── Pre-build controls HTML (avoids nested f-string inside st.markdown) ───────
+if total_slides <= 1:
+    controls_html = ""
+else:
+    controls_html = (
+        '<div class="slideshow-controls">'
+        '<button class="slide-btn" onclick="cwSlide(cwCurSlide-1)" title="Previous">&#8592;</button>'
+        f'<div class="slide-dots" id="cwDots">{dots_html}</div>'
+        '<button class="slide-btn" onclick="cwSlide(cwCurSlide+1)" title="Next">&#8594;</button>'
+        '</div>'
+    )
+
 # ── Render ─────────────────────────────────────────────────────────────────────
 st.markdown(f"""
 <div class="universe-row">
@@ -1222,13 +1235,7 @@ st.markdown(f"""
     <div class="slideshow-body" id="cwSlideshowBody">
       {slides_html}
     </div>
-    {"" if total_slides <= 1 else f'''
-    <div class="slideshow-controls">
-      <button class="slide-btn" onclick="cwSlide(cwCurSlide-1)" title="Previous">&#8592;</button>
-      <div class="slide-dots" id="cwDots">{dots_html}</div>
-      <button class="slide-btn" onclick="cwSlide(cwCurSlide+1)" title="Next">&#8594;</button>
-    </div>
-    '''}
+    {controls_html}
   </div>
 
 </div>
@@ -1267,10 +1274,7 @@ st.markdown(f"""
     <div class="sc-tag">cinewrap.app #MYWRAP2026</div>
   </div>
 </div>
-<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:2px">
-  <button class="share-btn" onclick="cwShare()">&#8593; SHARE YOUR WRAP</button>
-  <button class="download-btn" onclick="cwDownloadPNG()">&#8681; DOWNLOAD AS PNG</button>
-</div>
+<button class="share-btn" id="cwShareBtn" onclick="cwDownloadPNG()">&#8681; DOWNLOAD YOUR WRAP AS PNG</button>
 
 <script>
 (function(){{
@@ -1299,7 +1303,7 @@ st.markdown(f"""
 
   /* ── Share (copy link to clipboard) ── */
   window.cwShare = function() {{
-    var btn = document.querySelector('.share-btn');
+    var btn = document.getElementById('cwShareBtn') || document.querySelector('.share-btn');
     var text = 'cinewrap.app/u/{username} — The {dna_adj} {dna_noun} #MYWRAP2026';
     if (navigator.clipboard && navigator.clipboard.writeText) {{
       navigator.clipboard.writeText(text).then(function() {{
@@ -1335,7 +1339,7 @@ st.markdown(f"""
 
   /* ── Download PNG — pure canvas draw (no CDN needed) ── */
   window.cwDownloadPNG = function() {{
-    var btn = document.querySelector('.download-btn');
+    var btn = document.querySelector('.share-btn');
     btn.textContent = '⏳ DRAWING…';
     btn.disabled = true;
 
@@ -1461,12 +1465,11 @@ st.markdown(f"""
       link.click();
       document.body.removeChild(link);
       btn.textContent = '✓ SAVED!';
-      btn.style.borderColor = '#4CAF50';
-      btn.style.color = '#4CAF50';
+      btn.style.background = '#1a6b1a';
       setTimeout(function() {{
-        btn.textContent = '↓ DOWNLOAD AS PNG';
-        btn.style.borderColor = '';
-        btn.style.color = '';
+        btn.textContent = '↓ DOWNLOAD YOUR WRAP';
+        btn.style.background = '';
+        btn.style.disabled = false;
         btn.disabled = false;
       }}, 2200);
     }}, 60);
