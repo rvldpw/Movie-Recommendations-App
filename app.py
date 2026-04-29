@@ -752,16 +752,6 @@ if country_profile:
                 unsafe_allow_html=True,
             )
 
-# ── Recent Activity (unchanged) ────────────────────────────────────────────────
-st.markdown("## 📽️ YOUR RECENT PHASE")
-if recent.empty:
-    st.warning("No watch history found for this user.")
-else:
-    n     = len(recent)
-    cols  = min(n, 5)
-    cards = [recent_card(row, show_posters) for _, row in recent.iterrows()]
-    render_grid(cards, cols=cols)
-
 # ── Recommendations (unchanged) ─────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("## 🍿 PICKED FOR YOU")
@@ -790,33 +780,367 @@ else:
         unsafe_allow_html=True,
     )
 
-# ── Taste DNA (unchanged) ──────────────────────────────────────────────────────
-st.markdown("---")
-st.markdown("## 🧬 YOUR TASTE DNA")
-if genres:
-    genre_df = pd.DataFrame(genres, columns=["Genre", "Score"]).set_index("Genre")
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.bar_chart(genre_df, use_container_width=True, color="#E50914")
-    with col2:
-        st.markdown("<br>", unsafe_allow_html=True)
-        for genre, score in genres:
-            bar_w = int(score * 100)
-            st.markdown(
-                "<div style='margin-bottom:8px'>"
-                "<div style='display:flex;justify-content:space-between;"
-                "font-size:0.78rem;color:#BBB;margin-bottom:3px;font-family:Inter,sans-serif'>"
-                "<span>" + genre + "</span>"
-                "<span style='color:#E50914;font-weight:700'>" + str(bar_w) + "%</span>"
-                "</div>"
-                "<div style='background:#1C1C1C;border-radius:4px;height:5px;overflow:hidden'>"
-                "<div style='background:linear-gradient(90deg,#B20710,#E50914);"
-                "width:" + str(bar_w) + "%;height:5px;border-radius:4px'></div>"
-                "</div></div>",
-                unsafe_allow_html=True,
-            )
-else:
-    st.warning("Could not build a genre profile for this user.")
+# ── Taste DNA ──────────────────────────────────────────────────────
+DNA_ADJ = {
+    "Drama": ["Tragic","Emotive","Brooding","Melancholic","Visceral"],
+    "Thriller": ["Paranoid","Razor","Shadow","Pulse","Fractured"],
+    "Action": ["Kinetic","Furious","Titanium","Electric","Turbo"],
+    "Comedy": ["Absurdist","Deadpan","Manic","Vivid","Neon"],
+    "Horror": ["Haunted","Primordial","Void","Spectral","Infernal"],
+    "Romance": ["Velvet","Tender","Aching","Golden","Ephemeral"],
+    "Sci-Fi": ["Quantum","Orbital","Binary","Stellar","Synthetic"],
+    "Crime": ["Noir","Rogue","Cryptic","Obsidian","Hollow"],
+    "Animation": ["Dreaming","Whimsical","Vivid","Boundless","Surreal"],
+    "Documentary":["Lucid","Raw","Unfiltered","Searching","Honest"],
+    "Fantasy":["Mythic","Arcane","Wandering","Enchanted","Ancient"],
+    "Adventure":["Nomadic","Drifting","Boundless","Fearless","Wild"],
+}
+
+DNA_NOUN = [
+    "Auteur","Cinephile","Curator","Visionary","Archivist",
+    "Oracle","Phantom","Pioneer","Seeker","Nomad"
+]
+
+def get_dna_nickname(genres:list, user_id:int)->tuple[str,str]:
+    top_genre = genres[0][0] if genres else "Drama"
+    adjs = DNA_ADJ.get(top_genre, ["Cosmic","Liminal","Drifting"])
+    rng = random.Random(user_id*13)
+    return rng.choice(adjs), rng.choice(DNA_NOUN)
+
+def rarity_score(genres:list, user_id:int)->int:
+    if not genres:
+        return 0
+    diversity=len(genres)*12
+    top_score=int((1-genres[0][1])*200)
+    return min(499, diversity+top_score+(user_id%47))
+
+GENRE_COLORS=[
+"#E50914","#F5C518","#4CAF50","#2196F3","#FF5722",
+"#E91E63","#9C27B0","#00BCD4","#FF9800","#607D8B"
+]
+
+def genre_color(idx:int)->str:
+    return GENRE_COLORS[idx % len(GENRE_COLORS)]
+
+
+# ── Data prep ─────────────────────────────────────────────────────
+dna_adj,dna_noun=get_dna_nickname(genres,user_id)
+dna_score=rarity_score(genres,user_id)
+top_pct=max(1,round((1-dna_score/500)*100))
+
+genre_js="["+",".join(
+    f'{{"name":"{g}","score":{round(s,3)},"color":"{genre_color(i)}"}}'
+    for i,(g,s) in enumerate(genres)
+)+"]"
+
+recent_js_items=[]
+for _,row in recent.iterrows():
+    poster_url,_=safe_poster(row["title"]) if show_posters else (PLACEHOLDER,"N/A")
+
+    title_safe=(
+        row["title"]
+        .replace("\\","\\\\")
+        .replace('"','\\"')
+        .replace("'","\\'")
+    )
+
+    date_str=str(row["datetime"].date())
+
+    recent_js_items.append(
+        f'{{"title":"{title_safe}","rating":{int(round(row["rating"]))},'
+        f'"date":"{date_str}","poster":"{poster_url}"}}'
+    )
+
+recent_js="["+",".join(recent_js_items)+"]"
+
+safe_username=username.replace('"','\\"')
+
+st.markdown("## 🎬 YOUR CINEWRAP UNIVERSE")
+
+st.markdown(f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+.cw-uni-row{{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}}
+.dna-card{{background:#0f0000;border:1px solid #2a0808;border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;min-height:290px}}
+.dna-logo{{font-family:'Bebas Neue';font-size:10px;letter-spacing:3px;color:#E50914}}
+.dna-arch-label{{font-size:9px;color:#444;margin-bottom:3px}}
+.dna-nickname{{font-family:'Bebas Neue';font-size:21px;letter-spacing:2px;color:#fff}}
+.dna-nickname span{{color:#E50914}}
+.dna-helix{{flex:1;display:flex;flex-direction:column;gap:6px}}
+.dna-rung{{display:flex;align-items:center;gap:4px}}
+.dna-dot{{width:7px;height:7px;border-radius:50%}}
+.dna-bar{{height:3px;border-radius:2px;flex:1}}
+.dna-glabel{{font-size:8px;font-family:'Space Mono';color:#555;font-weight:700}}
+.dna-bottom{{margin-top:10px;padding-top:10px;border-top:1px solid #1a0808}}
+.dna-stats{{display:flex;justify-content:space-between}}
+.dna-score{{font-family:'Bebas Neue';font-size:30px;color:#F5C518}}
+.dna-score-sub{{font-size:8px;color:#333}}
+.dna-pct-top{{font-size:11px;color:#555}}
+.dna-pct-bot{{font-size:8px;color:#333}}
+
+.ss-wrap{{position:relative;border-radius:14px;overflow:hidden;background:#0d0d0d;min-height:290px}}
+.ss-slide{{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transition:.6s}}
+.ss-slide.active{{opacity:1}}
+.ss-img{{height:155px;overflow:hidden}}
+.ss-img img{{width:100%;height:100%;object-fit:cover}}
+.ss-info{{padding:10px}}
+.ss-title{{font-size:11px;color:#fff}}
+.ss-stars{{font-size:10px;color:#F5C518}}
+.ss-date{{font-size:9px;color:#666}}
+.ss-badge{{position:absolute;top:8px;left:8px;background:#E50914;padding:2px 6px;font-size:8px}}
+.ss-counter{{position:absolute;top:8px;right:8px}}
+.ss-dots{{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px}}
+.ss-dot{{width:5px;height:5px;border-radius:50%;background:#333}}
+.ss-dot.active{{background:#E50914;width:14px}}
+
+.sc-canvas{{background:#0f0000;border-radius:16px;padding:20px}}
+.sc-nick{{font-family:'Bebas Neue';font-size:30px}}
+.sc-nick span{{color:#E50914}}
+.sc-grid{{display:grid;grid-template-columns:1fr 1fr;gap:8px}}
+.sc-stat{{border:1px solid #1e1e1e;padding:8px 10px;border-radius:8px}}
+.sc-stat-value.gold{{color:#F5C518}}
+.sc-stat-value.red{{color:#E50914}}
+.sc-dna-row{{display:flex;gap:3px;margin-top:12px}}
+.sc-dna-seg{{height:4px;border-radius:2px}}
+.sc-pills{{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}}
+.sc-pill{{font-size:9px;padding:3px 8px;border-radius:20px;border:1px solid}}
+.sc-share-btn{{width:100%;background:#E50914;color:white;border:none;padding:10px;border-radius:8px}}
+
+@media(max-width:480px){{
+.cw-uni-row{{grid-template-columns:1fr}}
+}}
+</style>
+
+<div class="cw-uni-row">
+
+<div class="dna-card">
+<div class="dna-logo">◈ CINEWRAP DNA</div>
+<div class="dna-arch-label">Your movie archetype</div>
+<div class="dna-nickname">
+THE <span>{dna_adj.upper()}</span><br>{dna_noun.upper()}
+</div>
+
+<div class="dna-helix" id="cwDnaHelix"></div>
+
+<div class="dna-bottom">
+<div class="dna-stats">
+<div>
+<div class="dna-score">{dna_score}</div>
+<div class="dna-score-sub">RARITY SCORE</div>
+</div>
+
+<div>
+<div class="dna-pct-top">TOP {top_pct}%</div>
+<div class="dna-pct-bot">OF CINEPHILES</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="ss-wrap">
+<div class="ss-counter" id="cwSsCounter">{1 if len(recent) else 0} / {len(recent)}</div>
+<div id="cwSlides"></div>
+<div class="ss-dots" id="cwSsDots"></div>
+</div>
+
+</div>
+
+
+<div class="sc-canvas">
+<div class="sc-nick">
+THE <span>{dna_adj.upper()}</span> {dna_noun.upper()}
+</div>
+
+<div class="sc-grid">
+<div class="sc-stat">
+TOP GENRE<br>
+<div>{genres[0][0].upper() if genres else '—'}</div>
+</div>
+
+<div class="sc-stat">
+RARITY<br>
+<div class="gold">{dna_score}</div>
+</div>
+
+<div class="sc-stat">
+FILMS RATED<br>
+<div id="cwFilmsRated">—</div>
+</div>
+
+<div class="sc-stat">
+AVG RATING<br>
+<div id="cwAvgRating">—</div>
+</div>
+</div>
+
+<div class="sc-dna-row" id="cwScDna"></div>
+<div class="sc-pills" id="cwScPills"></div>
+</div>
+
+<button class="sc-share-btn" onclick="cwShare()">
+↑ SHARE YOUR WRAP
+</button>
+
+
+<script>
+(function(){{
+var genres={genre_js};
+var movies={recent_js};
+var username="{safe_username}";
+
+var PILL_COLORS=[
+{{bg:'rgba(229,9,20,.12)',b:'rgba(229,9,20,.4)',t:'#ff6666'}},
+{{bg:'rgba(245,197,24,.1)',b:'rgba(245,197,24,.35)',t:'#d4a017'}},
+{{bg:'rgba(76,175,80,.1)',b:'rgba(76,175,80,.35)',t:'#4CAF50'}}
+];
+
+function renderHelix(){{
+var h=document.getElementById('cwDnaHelix');
+if(!h)return;
+
+genres.forEach(function(g,i){{
+var r=document.createElement('div');
+r.className='dna-rung';
+
+var w=Math.max(15,Math.floor(g.score*75));
+
+r.innerHTML=
+'<div class="dna-dot" style="background:'+g.color+'"></div>'+
+'<div class="dna-bar" style="background:'+g.color+';max-width:'+w+'%"></div>'+
+'<div class="dna-glabel">'+g.name+'</div>';
+
+h.appendChild(r);
+}});
+}}
+
+function renderSlides(){{
+if(!movies.length) return;
+
+var c=document.getElementById('cwSlides');
+var d=document.getElementById('cwSsDots');
+
+movies.forEach(function(m,i){{
+var s=document.createElement('div');
+s.className='ss-slide'+(i===0?' active':'');
+
+var r=Math.max(1,Math.min(5,m.rating));
+var stars='★'.repeat(r)+'☆'.repeat(5-r);
+
+var imgHtml=
+m.poster &&
+m.poster!=='https://placehold.co/400x600/141414/333333?text=No+Poster'
+?
+'<img src="'+m.poster+'">'
+:
+'<span style="font-size:28px;opacity:.15">🎬</span>';
+
+s.innerHTML=
+'<div class="ss-badge">#'+(i+1)+'</div>'+
+'<div class="ss-img">'+imgHtml+'</div>'+
+'<div class="ss-info">'+
+'<div class="ss-title">'+m.title+'</div>'+
+'<div class="ss-stars">'+stars+'</div>'+
+'<div class="ss-date">'+m.date+'</div>'+
+'</div>';
+
+c.appendChild(s);
+
+var dot=document.createElement('div');
+dot.className='ss-dot'+(i===0?' active':'');
+
+(function(idx){{
+dot.onclick=function(){{goTo(idx);}};
+}})(i);
+
+d.appendChild(dot);
+}});
+
+window._cwCur=0;
+
+clearInterval(window._cwTimer);
+
+window._cwTimer=setInterval(function(){{
+goTo((window._cwCur+1)%movies.length);
+}},3000);
+
+}}
+
+function goTo(idx){{
+document.querySelectorAll('.ss-slide').forEach(function(s,i){{
+s.classList.toggle('active',i===idx);
+}});
+
+document.querySelectorAll('.ss-dot').forEach(function(d,i){{
+d.classList.toggle('active',i===idx);
+}});
+
+document.getElementById('cwSsCounter').textContent=
+(idx+1)+' / '+movies.length;
+
+window._cwCur=idx;
+}}
+
+function renderShareCard(){{
+var dna=document.getElementById('cwScDna');
+
+genres.forEach(function(g){{
+var seg=document.createElement('div');
+seg.className='sc-dna-seg';
+seg.style.background=g.color;
+seg.style.flex=g.score;
+dna.appendChild(seg);
+}});
+
+var pills=document.getElementById('cwScPills');
+
+genres.forEach(function(g,i){{
+var c=PILL_COLORS[i%PILL_COLORS.length];
+
+var p=document.createElement('span');
+p.className='sc-pill';
+p.textContent=g.name;
+
+p.style.background=c.bg;
+p.style.borderColor=c.b;
+p.style.color=c.t;
+
+pills.appendChild(p);
+}});
+
+var avg=movies.length
+? movies.reduce((a,b)=>a+b.rating,0)/movies.length
+:0;
+
+document.getElementById('cwFilmsRated').textContent=movies.length;
+document.getElementById('cwAvgRating').textContent='★ '+avg.toFixed(1);
+
+}}
+
+window.cwShare=function(){{
+var btn=document.querySelector('.sc-share-btn');
+btn.textContent='✓ COPIED';
+btn.style.background='#1a6b1a';
+
+setTimeout(function(){{
+btn.textContent='↑ SHARE YOUR WRAP';
+btn.style.background='';
+}},2200);
+
+if(navigator.clipboard){{
+navigator.clipboard.writeText(
+'cinewrap.app/u/'+username+' #MYWRAP2026'
+).catch(function(){{}});
+}}
+}};
+
+renderHelix();
+renderSlides();
+renderShareCard();
+
+}})();
+</script>
+""", unsafe_allow_html=True)
 
 # ── Footer (unchanged) ─────────────────────────────────────────────────────────
 st.markdown("---")
