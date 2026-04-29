@@ -850,7 +850,7 @@ recent_js = json.dumps(recent_js_items)
 
 st.markdown("## 🎬 YOUR CINEWRAP UNIVERSE")
 
-st.markdown(f"""
+st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
 .cw-uni-row{{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}}
@@ -964,9 +964,9 @@ st.markdown(f"""
 
 <script>
 (function(){{
-  var genres={genre_js};
-  var movies={recent_js};
-  var username="{username}";
+    var genres=__GENRES__;
+    var movies=__MOVIES__;
+    var username="__USERNAME__";
 
   var PILL_COLORS=[
     {{bg:'rgba(229,9,20,.12)',b:'rgba(229,9,20,.4)',t:'#ff6666'}},
@@ -1091,7 +1091,10 @@ st.markdown(f"""
 
 }})();
 </script>
-""", unsafe_allow_html=True)
+""".replace("__GENRES__", genre_js)
+   .replace("__MOVIES__", recent_js)
+   .replace("__USERNAME__", username),
+unsafe_allow_html=True)
 
 # ── Footer (unchanged) ─────────────────────────────────────────────────────────
 st.markdown("---")
