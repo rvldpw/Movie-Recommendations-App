@@ -212,72 +212,89 @@ p, li, span { color:#BBB !important; }
     text-transform: uppercase;
 }
 
-/* ── DNA + Slideshow section ── */
+/* ── DNA + Recent row — same grid as .movie-grid ── */
 .universe-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 14px;
-}
-@media (max-width: 640px) {
-    .universe-row { grid-template-columns: 1fr; }
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: start;
 }
 
+/* DNA card lives in column 1, matches poster-card dimensions exactly */
 .dna-card {
     background: #0f0000;
     border: 1px solid #2a0808;
-    border-radius: 14px;
-    padding: 16px 14px;
-    position: relative;
+    border-radius: 12px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 300px;
+    height: 100%;
+    position: relative;
+    transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
 }
-.dna-card::before {
+.dna-card:hover {
+    border-color: var(--red);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(229,9,20,0.2);
+}
+/* DNA card image area — same aspect-ratio as poster-img-wrap (2/3) */
+.dna-card .dna-img-wrap {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background: linear-gradient(180deg, #1a0000 0%, #0a0000 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+.dna-card .dna-img-wrap::after {
     content: '';
     position: absolute;
-    top: -30px; right: -30px;
-    width: 130px; height: 130px;
-    background: radial-gradient(circle, rgba(229,9,20,0.18) 0%, transparent 70%);
+    top: -20px; right: -20px;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(229,9,20,0.22) 0%, transparent 70%);
     pointer-events: none;
 }
 .dna-logo {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 10px;
-    letter-spacing: 3px;
+    font-size: 9px;
+    letter-spacing: 2.5px;
     color: var(--red);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 .dna-nickname-label {
-    font-size: 9px;
-    letter-spacing: 2px;
+    font-size: 8px;
+    letter-spacing: 1.5px;
     color: #444;
     text-transform: uppercase;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
 }
 .dna-nickname {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
+    font-size: 17px;
+    letter-spacing: 1.5px;
     color: var(--white);
     line-height: 1.05;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 .dna-nickname span { color: var(--red); }
 .dna-helix { flex: 1; }
-.dna-strand { display: flex; flex-direction: column; gap: 6px; }
-.dna-rung { display: flex; align-items: center; gap: 4px; animation: dnafloat 3s ease-in-out infinite; }
+.dna-strand { display: flex; flex-direction: column; gap: 5px; }
+.dna-rung { display: flex; align-items: center; gap: 3px; animation: dnafloat 3s ease-in-out infinite; }
 .dna-rung:nth-child(2) { animation-delay: .3s; }
 .dna-rung:nth-child(3) { animation-delay: .6s; }
 .dna-rung:nth-child(4) { animation-delay: .9s; }
 .dna-rung:nth-child(5) { animation-delay: 1.2s; }
 .dna-rung:nth-child(6) { animation-delay: 1.5s; }
 @keyframes dnafloat { 0%,100%{transform:translateX(0)} 50%{transform:translateX(2px)} }
-.dna-dot-l, .dna-dot-r { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.dna-bar { height: 3px; border-radius: 2px; flex: 1; }
+.dna-dot-l, .dna-dot-r { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.dna-bar { height: 2px; border-radius: 2px; flex: 1; }
 .dna-genre-label {
-    font-size: 8px;
+    font-size: 7px;
     font-family: 'Space Mono', monospace;
     color: #555;
     white-space: nowrap;
@@ -285,133 +302,80 @@ p, li, span { color:#BBB !important; }
     font-weight: 700;
 }
 .dna-bottom {
-    margin-top: 10px;
-    padding-top: 10px;
+    margin-top: 6px;
+    padding-top: 6px;
     border-top: 1px solid #1a0808;
 }
 .dna-stats-row { display: flex; align-items: flex-end; justify-content: space-between; }
 .dna-rarity-score {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 30px;
+    font-size: 22px;
     color: var(--gold);
     line-height: 1;
 }
 .dna-rarity-sub {
-    font-size: 8px;
+    font-size: 7px;
     color: #333;
     letter-spacing: 1px;
     text-transform: uppercase;
     font-family: 'Space Mono', monospace;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 .dna-rarity-right { text-align: right; }
 .dna-rarity-right-top {
-    font-size: 11px;
+    font-size: 9px;
     color: #555;
     font-family: 'Bebas Neue', sans-serif;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
 }
 .dna-rarity-right-bot {
-    font-size: 8px;
+    font-size: 7px;
     color: #333;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     font-family: 'Space Mono', monospace;
 }
 .dna-share-badge {
     position: absolute;
-    top: 10px; right: 10px;
+    top: 6px; right: 6px;
     background: rgba(229,9,20,0.15);
     border: 1px solid rgba(229,9,20,0.3);
     border-radius: 20px;
-    padding: 2px 7px;
-    font-size: 8px;
+    padding: 1px 5px;
+    font-size: 7px;
     color: var(--red);
     letter-spacing: 1px;
     font-family: 'Space Mono', monospace;
     font-weight: 700;
 }
 
-/* ── Slideshow ── */
-.slideshow-wrap {
-    position: relative;
-    border-radius: 14px;
-    overflow: hidden;
-    background: #0d0d0d;
+/* ── Recent movies — individual poster cards (same as poster-card) ── */
+.recent-poster-card {
+    background: var(--card);
     border: 1px solid var(--border);
-    min-height: 300px;
-}
-.cw-slide {
-    position: absolute;
-    inset: 0;
+    border-radius: 12px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    opacity: 0;
-    transition: opacity 0.6s ease;
-    pointer-events: none;
+    height: 100%;
+    transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
 }
-.cw-slide.active { opacity: 1; pointer-events: auto; }
-.cw-slide-img-ph {
+.recent-poster-card:hover {
+    border-color: var(--red);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(229,9,20,0.2);
+}
+.recent-poster-card .poster-img-wrap {
     width: 100%;
-    height: 160px;
-    background: #130000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    background: #1a1a1a;
     flex-shrink: 0;
-    overflow: hidden;
 }
-.cw-slide-img-ph img { width: 100%; height: 100%; object-fit: cover; }
-.cw-slide-ph-icon { font-size: 28px; opacity: 0.15; }
-.cw-slide-info { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.cw-slide-title {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--white);
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-.cw-slide-rating { font-size: 10px; color: var(--gold); }
-.cw-slide-imdb   { font-size: 9px; color: #555; }
-.cw-slide-date   { font-size: 9px; color: var(--muted); margin-top: auto; }
-.cw-slide-badge {
-    position: absolute;
-    top: 8px; left: 8px;
-    background: var(--red);
-    color: white;
-    font-size: 8px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: 'Space Mono', monospace;
-}
-.cw-slide-dots {
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 4px;
-}
-.cw-slide-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: #333;
-    cursor: pointer;
-    transition: background 0.3s, width 0.3s;
-}
-.cw-slide-dot.active { background: var(--red); width: 14px; border-radius: 3px; }
-.cw-slide-counter {
-    position: absolute;
-    top: 8px; right: 8px;
-    background: rgba(0,0,0,0.6);
-    border-radius: 10px;
-    padding: 2px 7px;
-    font-size: 9px;
-    color: #888;
-    font-family: 'Space Mono', monospace;
+.recent-poster-card .poster-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 /* ── Shareable card ── */
@@ -1000,34 +964,34 @@ for i, (genre_name, genre_score) in enumerate(genres):
         f'</div>'
     )
 
-# Build slideshow slides HTML
-slides_html = ""
-dots_html   = ""
+# Build slideshow slides HTML — now individual poster cards
+recent_cards_html = ""
 total_slides = len(recent) if not recent.empty else 0
 
 for i, (_, row) in enumerate(recent.iterrows()):
     poster_url, imdb_r = safe_poster(row["title"]) if show_posters else (PLACEHOLDER, "N/A")
     rating_val  = int(round(row["rating"]))
     stars       = "★" * rating_val + "☆" * (5 - rating_val)
-    short_title = row["title"][:24] + "…" if len(row["title"]) > 25 else row["title"]
-    active_cls  = " active" if i == 0 else ""
-    dot_active  = " active" if i == 0 else ""
-    slides_html += (
-        f'<div class="cw-slide{active_cls}">'
-        f'  <div class="cw-slide-badge">#{i+1} RECENT</div>'
-        f'  <div class="cw-slide-img-ph">'
-        f'    <img src="{poster_url}" alt="" onerror="this.style.display=\'none\'">'
-        f'    <div class="cw-slide-ph-icon" style="display:none">🎬</div>'
+    country     = get_movie_country(row["title"])
+    flag        = country_flag(country)
+    country_html = (
+        f'<div class="country-tag">{flag} {country}</div>'
+        if country else ""
+    )
+    recent_cards_html += (
+        f'<div class="recent-poster-card">'
+        f'  <div class="poster-img-wrap">'
+        f'    <img src="{poster_url}" alt="" onerror="this.src=&quot;{PLACEHOLDER}&quot;"/>'
         f'  </div>'
-        f'  <div class="cw-slide-info">'
-        f'    <div class="cw-slide-title">{short_title}</div>'
-        f'    <div class="cw-slide-rating">{stars}</div>'
-        f'    <div class="cw-slide-imdb">IMDB {imdb_r}</div>'
-        f'    <div class="cw-slide-date">{str(row["datetime"].date())}</div>'
+        f'  <div class="poster-info">'
+        f'    <div class="poster-title">{row["title"]}</div>'
+        f'    <div class="poster-rating">{stars} &nbsp; IMDB {imdb_r}</div>'
+        f'    <div class="poster-date">&#128197; {str(row["datetime"].date())}</div>'
+        f'    {country_html}'
+        f'    <div class="poster-user-rating">Your rating: {row["rating"]}/5</div>'
         f'  </div>'
         f'</div>'
     )
-    dots_html += f'<div class="cw-slide-dot{dot_active}" onclick="cwGoTo({i},{total_slides})"></div>'
 
 # Build share card DNA bar + pills
 sc_dna_segs = ""
@@ -1062,39 +1026,39 @@ top_genres_str = " · ".join(g for g, _ in genres[:3]) if genres else ""
 st.markdown(f"""
 <div class="universe-row">
 
-  <!-- DNA CARD -->
-  <div>
-    <div class="dna-card">
+  <!-- COL 1: DNA CARD -->
+  <div class="dna-card">
+    <div class="dna-img-wrap">
       <div class="dna-share-badge">DNA</div>
-      <div class="dna-logo">◈ CINEWRAP DNA</div>
-      <div class="dna-nickname-label">Your movie archetype</div>
-      <div class="dna-nickname">THE <span>{dna_adj.upper()}</span><br>{dna_noun.upper()}</div>
-      <div class="dna-helix">
-        <div class="dna-strand">{helix_rungs}</div>
-      </div>
-      <div class="dna-bottom">
-        <div class="dna-stats-row">
-          <div>
-            <div class="dna-rarity-score">{score}</div>
-            <div class="dna-rarity-sub">RARITY SCORE</div>
-          </div>
-          <div class="dna-rarity-right">
-            <div class="dna-rarity-right-top">TOP {pct_top}%</div>
-            <div class="dna-rarity-right-bot">OF CINEPHILES</div>
+      <div style="padding:12px 10px;display:flex;flex-direction:column;width:100%;flex:1">
+        <div class="dna-logo">◈ CINEWRAP DNA</div>
+        <div class="dna-nickname-label">Your archetype</div>
+        <div class="dna-nickname">THE <span>{dna_adj.upper()}</span><br>{dna_noun.upper()}</div>
+        <div class="dna-helix" style="flex:1">
+          <div class="dna-strand">{helix_rungs}</div>
+        </div>
+        <div class="dna-bottom">
+          <div class="dna-stats-row">
+            <div>
+              <div class="dna-rarity-score">{score}</div>
+              <div class="dna-rarity-sub">RARITY</div>
+            </div>
+            <div class="dna-rarity-right">
+              <div class="dna-rarity-right-top">TOP {pct_top}%</div>
+              <div class="dna-rarity-right-bot">CINEPHILES</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- RECENT SLIDESHOW -->
-  <div>
-    <div class="slideshow-wrap">
-      <div class="cw-slide-counter" id="cwCounter">1 / {total_slides}</div>
-      {slides_html}
-      <div class="cw-slide-dots">{dots_html}</div>
+    <div class="poster-info">
+      <div class="poster-title" style="color:var(--red);font-family:'Bebas Neue',sans-serif;font-size:0.75rem;letter-spacing:1.5px">YOUR TASTE DNA</div>
+      <div class="poster-date">{top_genres_str}</div>
     </div>
   </div>
+
+  <!-- COLS 2–5: RECENT POSTER CARDS -->
+  {recent_cards_html}
 
 </div>
 
@@ -1136,27 +1100,6 @@ st.markdown(f"""
 
 <script>
 (function(){{
-  var cur = 0;
-  var total = {total_slides};
-
-  window.cwGoTo = function(idx, tot) {{
-    document.querySelectorAll('.cw-slide').forEach(function(s, i) {{
-      s.classList.toggle('active', i === idx);
-    }});
-    document.querySelectorAll('.cw-slide-dot').forEach(function(d, i) {{
-      d.classList.toggle('active', i === idx);
-    }});
-    cur = idx;
-    var el = document.getElementById('cwCounter');
-    if (el) el.textContent = (idx + 1) + ' / ' + tot;
-  }};
-
-  if (total > 1) {{
-    setInterval(function() {{
-      cwGoTo((cur + 1) % total, total);
-    }}, 3200);
-  }}
-
   window.cwShare = function() {{
     var btn = document.querySelector('.share-btn');
     btn.textContent = '✓ COPIED — PASTE TO STORIES!';
