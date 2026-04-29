@@ -1082,18 +1082,12 @@ st.markdown(f"""
 </script>
 """, unsafe_allow_html=True)
 
-# ── Footer ─────────────────────────────────────────────────────────
+# ── Footer (unchanged) ─────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown(
-    """
-    <div style='text-align:center;
-                padding:1.5rem 0 0.5rem;
-                color:#222;
-                font-size:0.72rem;
-                font-family:Inter,sans-serif;
-                letter-spacing:2px'>
-        CINEWRAP 2026 &middot; CONTENT + COLLABORATIVE + POPULARITY + COUNTRY
-    </div>
-    """,
+    "<div style='text-align:center;padding:1.5rem 0 0.5rem;"
+    "color:#222;font-size:0.72rem;font-family:Inter,sans-serif;letter-spacing:2px'>"
+    "CINEWRAP 2026 &nbsp;&middot;&nbsp; CONTENT + COLLABORATIVE + POPULARITY + COUNTRY"
+    "</div>",
     unsafe_allow_html=True,
 )
