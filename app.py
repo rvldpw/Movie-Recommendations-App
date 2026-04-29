@@ -62,8 +62,9 @@ st.markdown("""
     box-shadow: 0 0 0 3px rgba(229,9,20,0.2) !important;
 }
 .stTextInput label { color: #888 !important; font-size:0.8rem !important; }
-.stSlider [role="slider"] { background: var(--red) !important; }
-.stSlider [data-baseweb="slider-track"] div:first-child { background: var(--red) !important; }
+.stSelectbox [data-baseweb="select"] { background-color: var(--card2) !important; border-color: var(--border) !important; border-radius: 8px !important; }
+.stSelectbox [data-baseweb="select"]:focus { border-color: var(--red) !important; }
+.stSelectbox label { color: #888 !important; font-size:0.8rem !important; }
 .stToggle label { color: #CCC !important; }
 .stProgress > div > div {
     background: linear-gradient(90deg, var(--red2), var(--red)) !important;
@@ -908,6 +909,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
+# FIXED SIDEBAR UI: replaced sliders with dropdowns, multiples of 5/10
 with st.sidebar:
     st.markdown("### 🎬 CineWrap 2026")
     st.markdown(
@@ -916,9 +918,21 @@ with st.sidebar:
     )
     st.markdown("---")
     st.markdown("#### 🎯 Recommendations")
-    top_n_recs = st.slider("How many picks?", 5, 20, 10)
+    # Dropdown instead of slider, multiples of 10: 10,20,30,40,50
+    top_n_recs = st.selectbox(
+        "How many picks?",
+        options=[10, 20, 30, 40, 50],
+        index=0,
+        help="Number of movie recommendations (multiples of 10)"
+    )
     st.markdown("#### 📅 Watch History")
-    top_n_recent = st.slider("Recent movies shown", 3, 10, 5)
+    # Dropdown instead of slider, multiples of 5: 5,10,15,20,25
+    top_n_recent = st.selectbox(
+        "Recent movies shown",
+        options=[5, 10, 15, 20, 25],
+        index=0,
+        help="Number of recent movies to display (multiples of 5)"
+    )
     st.markdown("#### 🖼️ Movie Artwork")
     show_posters = st.toggle("Fetch posters from OMDb", value=True)
     st.markdown("#### 🌍 Country Filter")
