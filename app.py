@@ -231,7 +231,7 @@ p, li, span { color:#BBB !important; }
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 520px;
+    height: 560px;
     position: relative;
     transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
 }
@@ -366,7 +366,7 @@ p, li, span { color:#BBB !important; }
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 520px;
+    height: 560px;
     position: relative;
 }
 .slideshow-panel:hover {
@@ -396,6 +396,8 @@ p, li, span { color:#BBB !important; }
     flex: 1;
     position: relative;
     overflow: hidden;
+    min-height: 420px;
+    height: 420px;
 }
 .slide {
     position: absolute;
@@ -404,28 +406,31 @@ p, li, span { color:#BBB !important; }
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
+    height: 100%;
 }
 .slide.active {
     opacity: 1;
     pointer-events: auto;
 }
 .slide-poster {
-    width: 42%;
+    width: 38%;
     flex-shrink: 0;
     overflow: hidden;
+    height: 100%;
 }
 .slide-poster img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center top;
     display: block;
 }
 .slide-info {
     flex: 1;
-    padding: 24px 22px;
+    padding: 28px 24px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     overflow: hidden;
 }
 .slide-title {
@@ -1169,6 +1174,13 @@ films_count    = len(full_history)
 avg_rating_val = round(full_history["rating"].mean(), 1) if not full_history.empty else 0.0
 top_genres_str = " · ".join(g for g, _ in genres[:3]) if genres else ""
 
+# ── Canvas draw data — JS-safe arrays for PNG download ─────────────────────
+sc_dna_bar_data = ", ".join(
+    f'["{genre_colors_list[i] if i < len(genre_colors_list) else "#888"}", {round(score_val, 3)}]'
+    for i, (_, score_val) in enumerate(genres)
+)
+genre_pill_names = ", ".join(f'"{g[0].upper()}"' for g in genres)
+
 # ── Render ─────────────────────────────────────────────────────────────────────
 st.markdown(f"""
 <div class="universe-row">
@@ -1260,7 +1272,6 @@ st.markdown(f"""
   <button class="download-btn" onclick="cwDownloadPNG()">&#8681; DOWNLOAD AS PNG</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 (function(){{
   /* ── Slideshow ── */
@@ -1282,48 +1293,173 @@ st.markdown(f"""
     if (counter) counter.textContent = (cwCurSlide + 1) + ' / ' + cwTotal;
   }};
 
-  /* ── Auto-advance every 4 s ── */
   if (cwTotal > 1) {{
     setInterval(function() {{ window.cwSlide(cwCurSlide + 1); }}, 4000);
   }}
 
-  /* ── Share ── */
+  /* ── Share (copy link to clipboard) ── */
   window.cwShare = function() {{
     var btn = document.querySelector('.share-btn');
-    btn.textContent = '✓ COPIED — PASTE TO STORIES!';
+    var text = 'cinewrap.app/u/{username} — The {dna_adj} {dna_noun} #MYWRAP2026';
+    if (navigator.clipboard && navigator.clipboard.writeText) {{
+      navigator.clipboard.writeText(text).then(function() {{
+        btn.textContent = '✓ LINK COPIED!';
+        btn.style.background = '#1a6b1a';
+        setTimeout(function() {{
+          btn.textContent = '↑ SHARE YOUR WRAP';
+          btn.style.background = '';
+        }}, 2400);
+      }}).catch(function() {{
+        cwFallbackCopy(text, btn);
+      }});
+    }} else {{
+      cwFallbackCopy(text, btn);
+    }}
+  }};
+
+  function cwFallbackCopy(text, btn) {{
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try {{ document.execCommand('copy'); }} catch(e) {{}}
+    document.body.removeChild(ta);
+    btn.textContent = '✓ LINK COPIED!';
     btn.style.background = '#1a6b1a';
     setTimeout(function() {{
       btn.textContent = '↑ SHARE YOUR WRAP';
       btn.style.background = '';
     }}, 2400);
-    if (navigator.clipboard) {{
-      navigator.clipboard.writeText(
-        'cinewrap.app/u/{username} — The {dna_adj} {dna_noun} #MYWRAP2026'
-      ).catch(function(){{}});
-    }}
-  }};
+  }}
 
-  /* ── Download PNG ── */
+  /* ── Download PNG — pure canvas draw (no CDN needed) ── */
   window.cwDownloadPNG = function() {{
     var btn = document.querySelector('.download-btn');
-    var card = document.getElementById('cwShareCard');
-    if (!card || typeof html2canvas === 'undefined') {{
-      alert('html2canvas not loaded yet, please try again.');
-      return;
-    }}
-    btn.textContent = '⏳ RENDERING…';
+    btn.textContent = '⏳ DRAWING…';
     btn.disabled = true;
-    html2canvas(card, {{
-      backgroundColor: '#0f0000',
-      scale: 2,
-      useCORS: true,
-      allowTaint: false,
-      logging: false,
-    }}).then(function(canvas) {{
+
+    var DPR   = 2;
+    var W     = 480;
+    var H     = 420;
+    var canvas = document.createElement('canvas');
+    canvas.width  = W * DPR;
+    canvas.height = H * DPR;
+    var ctx = canvas.getContext('2d');
+    ctx.scale(DPR, DPR);
+
+    /* background */
+    ctx.fillStyle = '#0f0000';
+    ctx.beginPath();
+    ctx.roundRect(0, 0, W, H, 14);
+    ctx.fill();
+
+    /* red glow bottom-right */
+    var grd = ctx.createRadialGradient(W-20, H-20, 0, W-20, H-20, 160);
+    grd.addColorStop(0, 'rgba(229,9,20,0.10)');
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    /* border */
+    ctx.strokeStyle = '#2a0808';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(0.5, 0.5, W-1, H-1, 14);
+    ctx.stroke();
+
+    /* helpers */
+    function txt(str, x, y, font, color, align) {{
+      ctx.font = font;
+      ctx.fillStyle = color;
+      ctx.textAlign = align || 'left';
+      ctx.fillText(str, x, y);
+    }}
+
+    /* CINEWRAP 2026 */
+    txt('CINEWRAP 2026', 28, 40, '700 10px "Space Mono",monospace', '#E50914');
+    txt('FILM YEAR', W-28, 40, '700 10px "Space Mono",monospace', '#333', 'right');
+
+    /* nickname */
+    txt('THE', 28, 82, '900 28px "Bebas Neue",sans-serif', '#FFFFFF');
+    var adjW = ctx.measureText('THE ').width;
+    txt('{dna_adj.upper()} ', 28 + adjW, 82, '900 28px "Bebas Neue",sans-serif', '#E50914');
+    var adjW2 = ctx.measureText('THE {dna_adj.upper()} ').width;
+    txt('{dna_noun.upper()}', 28 + adjW2, 82, '900 28px "Bebas Neue",sans-serif', '#FFFFFF');
+
+    /* subtitle */
+    txt('{top_genres_str}', 28, 104, '400 10px "Space Mono",monospace', '#555');
+
+    /* divider */
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(28, 120); ctx.lineTo(W-28, 120); ctx.stroke();
+
+    /* 4 stat boxes */
+    var stats = [
+      ['TOP GENRE', '{top_genre_name}', '#FFFFFF'],
+      ['RARITY',    '{score}',          '#F5C518'],
+      ['FILMS RATED','{films_count}',   '#E50914'],
+      ['AVG RATING', '★ {avg_rating_val}','#FFFFFF'],
+    ];
+    var bx = 28, by = 136, bw = (W-56-12)/2, bh = 68;
+    stats.forEach(function(s, i) {{
+      var col = i % 2, row2 = Math.floor(i/2);
+      var x = bx + col*(bw+12), y = by + row2*(bh+10);
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      ctx.strokeStyle = '#1e1e1e'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(x, y, bw, bh, 6); ctx.fill(); ctx.stroke();
+      txt(s[0], x+10, y+18, '700 8px "Space Mono",monospace', '#444');
+      txt(s[1], x+10, y+46, '400 22px "Bebas Neue",sans-serif', s[2]);
+    }});
+
+    /* DNA colour bar */
+    var genres = [{sc_dna_bar_data}];
+    var barY = 310, barH = 5, barX = 28, barMaxW = W-56;
+    var total = genres.reduce(function(a,b){{return a+b[1];}}, 0) || 1;
+    var cx2 = barX;
+    genres.forEach(function(g) {{
+      var segW = (g[1]/total)*barMaxW;
+      ctx.fillStyle = g[0];
+      ctx.globalAlpha = g[1];
+      ctx.beginPath(); ctx.roundRect(cx2, barY, segW, barH, 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      cx2 += segW;
+    }});
+
+    /* genre pills */
+    var pillColors = ['#ff6666','#c49010','#4CAF50','#64b5f6','#ff8a65','#f48fb1','#ce93d8','#4dd0e1'];
+    var genreNames = [{genre_pill_names}];
+    var px2 = 28, py2 = 328;
+    ctx.font = '700 9px "Space Mono",monospace';
+    genreNames.forEach(function(g, i) {{
+      var color = pillColors[i % pillColors.length];
+      var tw = ctx.measureText(g).width;
+      var pw = tw + 16, ph = 18;
+      if (px2 + pw > W - 28) {{ px2 = 28; py2 += 26; }}
+      ctx.fillStyle = color.replace(')', ',0.12)').replace('rgb(','rgba(') || 'rgba(229,9,20,0.12)';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(px2, py2, pw, ph, 9); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = color;
+      ctx.fillText(g, px2+8, py2+13);
+      px2 += pw + 6;
+    }});
+
+    /* footer */
+    var footerY = H - 40;
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(28, footerY); ctx.lineTo(W-28, footerY); ctx.stroke();
+    txt('@{username}', 28, footerY+18, '400 13px "Bebas Neue",sans-serif', '#555');
+    txt('cinewrap.app #MYWRAP2026', W-28, footerY+18, '400 9px "Space Mono",monospace', '#333', 'right');
+
+    /* download */
+    setTimeout(function() {{
       var link = document.createElement('a');
       link.download = 'cinewrap-{username}-2026.png';
       link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       btn.textContent = '✓ SAVED!';
       btn.style.borderColor = '#4CAF50';
       btn.style.color = '#4CAF50';
@@ -1333,11 +1469,7 @@ st.markdown(f"""
         btn.style.color = '';
         btn.disabled = false;
       }}, 2200);
-    }}).catch(function(err) {{
-      btn.textContent = '↓ DOWNLOAD AS PNG';
-      btn.disabled = false;
-      console.error('html2canvas error', err);
-    }});
+    }}, 60);
   }};
 }})();
 </script>
